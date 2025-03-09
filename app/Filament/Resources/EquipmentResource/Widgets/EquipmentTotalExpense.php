@@ -19,9 +19,12 @@ class EquipmentTotalExpense extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-//            Stat::make('ხარჯი', money($this->getPageTableQuery()
-//                ->selectRaw('SUM((detail_price * quantity) + craft_price + additional_expense) as total_expense')
-//                ->value('total_expense'))) ?? 0
+            Stat::make('ხარჯი', money(
+                $this->getPageTableQuery()
+                    ->join('damages', 'equipment.id', '=', 'damages.equipment_id') // Ensure correct join condition
+                    ->selectRaw('SUM((damages.detail_price * damages.quantity) + damages.craft_price + damages.additional_expense) as total_expense')
+                    ->value('total_expense') ?? 0
+            )),
         ];
     }
 }
