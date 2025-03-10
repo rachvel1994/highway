@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EquipmentRelationResource\RelationManagers\DamagesRelationManager;
 use App\Filament\Resources\EquipmentResource\Pages;
+use App\Filament\Resources\EquipmentResource\RelationManagers\DamagesRelationManager;
 use App\Models\Equipment;
 use Exception;
 use Filament\Forms;
@@ -33,6 +33,7 @@ class EquipmentResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('equipment')
                     ->label('ტექნიკა')
+                    ->unique(ignoreRecord: true)
                     ->required()
             ]);
     }

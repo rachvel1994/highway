@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\StoreResource\Pages;
+use App\Filament\Resources\StoreResource\RelationManagers\ProductsRelationManager;
 use App\Models\Store;
 use Exception;
 use Filament\Forms;
@@ -16,12 +17,16 @@ use Illuminate\Database\Eloquent\Builder;
 class StoreResource extends Resource
 {
     protected static ?string $model = Store::class;
+
     protected static ?string $navigationLabel = 'მაღაზია';
 
     protected static ?string $breadcrumb = 'მაღაზია';
 
     protected static ?string $modelLabel = 'მაღაზია';
+
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+    protected static ?string $navigationGroup = 'მაღაზია';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -29,35 +34,10 @@ class StoreResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('title')
                     ->label('სახელი')
+                    ->unique(ignoreRecord: true)
                     ->required()
                     ->columnSpanFull()
                     ->maxLength(255),
-                Forms\Components\Grid::make(4)->schema([
-                    Forms\Components\TextInput::make('price')
-                        ->label('ფასი')
-                        ->required()
-                        ->numeric()
-                        ->default(0)
-                        ->postfix('₾'),
-                    Forms\Components\TextInput::make('quantity')
-                        ->label('რაოდენობა')
-                        ->required()
-                        ->numeric()
-                        ->default(0),
-                    Forms\Components\Select::make('category_id')
-                        ->label('კატეგორია')
-                        ->searchable()
-                        ->preload()
-                        ->relationship('category', 'title'),
-                    Forms\Components\Select::make('measure_id')
-                        ->label('ზომის ერთეული')
-                        ->searchable()
-                        ->preload()
-                        ->relationship('measure', 'short_title'),
-                ]),
-                Forms\Components\Textarea::make('comment')
-                    ->label('კომენტარი')
-                    ->columnSpanFull(),
             ]);
     }
 
@@ -72,28 +52,6 @@ class StoreResource extends Resource
                     ->label('სახელი')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('price')
-                    ->label('ფასი')
-                    ->money('GEL')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('quantity')
-                    ->label('რაოდენობა')
-                    ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('category.title')
-                    ->label('კატეგორია')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('measure.short_title')
-                    ->label('ზომის ერთეული')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('comment')
-                    ->label('კომენტარი')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('დამატების თარიღი')
                     ->dateTime()
@@ -101,14 +59,6 @@ class StoreResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('category_id')
-                    ->label(__('კატეგორია'))
-                    ->preload()
-                    ->relationship('category', 'title'),
-                Tables\Filters\SelectFilter::make('measure_id')
-                    ->label(__('ზომის ერთეული'))
-                    ->preload()
-                    ->relationship('measure', 'short_title'),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
                         DatePicker::make('from')
@@ -141,7 +91,7 @@ class StoreResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductsRelationManager::class
         ];
     }
 

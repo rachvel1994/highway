@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\StoreResource\Widgets;
+namespace App\Filament\Resources\ProductResource\Widgets;
 
-use App\Filament\Resources\StoreResource\Pages\ListStores;
+use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class StoreTotalExpense extends StatsOverviewWidget
+class ProductTotalExpense extends StatsOverviewWidget
 {
     use InteractsWithPageTable;
 
     protected function getTablePage(): string
     {
-        return ListStores::class;
+        return ListProducts::class;
     }
 
     protected function getStats(): array
@@ -21,8 +21,7 @@ class StoreTotalExpense extends StatsOverviewWidget
         return [
             Stat::make('ხარჯი', money(
                 $this->getPageTableQuery()
-                    ->leftJoin('products', 'stores.id', '=', 'products.store_id')
-                    ->selectRaw('COALESCE(SUM(products.price * products.quantity), 0) as total_expense')
+                    ->selectRaw('COALESCE(SUM(price * quantity), 0) as total_expense')
                     ->value('total_expense')
             ))
         ];

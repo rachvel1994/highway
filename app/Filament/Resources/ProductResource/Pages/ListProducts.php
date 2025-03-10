@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\DamageResource\Pages;
+namespace App\Filament\Resources\ProductResource\Pages;
 
-use App\Filament\Resources\DamageResource;
+use App\Filament\Resources\ProductResource;
 use Filament\Actions;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 
-class ListDamages extends ListRecords
+class ListProducts extends ListRecords
 {
     use ExposesTableToWidgets;
 
-    protected static string $resource = DamageResource::class;
+    protected static string $resource = ProductResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -23,7 +23,7 @@ class ListDamages extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            DamageResource\Widgets\DamageTotalExpense::class
+            ProductResource\Widgets\ProductTotalExpense::class
         ];
     }
 }

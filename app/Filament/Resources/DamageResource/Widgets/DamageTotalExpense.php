@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\EquipmentResource\Widgets;
+namespace App\Filament\Resources\DamageResource\Widgets;
 
-use App\Filament\Resources\EquipmentResource\Pages\ListEquipment;
+use App\Filament\Resources\DamageResource\Pages\ListDamages;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class EquipmentTotalExpense extends StatsOverviewWidget
+class DamageTotalExpense extends StatsOverviewWidget
 {
     use InteractsWithPageTable;
 
     protected function getTablePage(): string
     {
-        return ListEquipment::class;
+        return ListDamages::class;
     }
 
     protected function getStats(): array
@@ -21,8 +21,7 @@ class EquipmentTotalExpense extends StatsOverviewWidget
         return [
             Stat::make('ხარჯი', money(
                 $this->getPageTableQuery()
-                    ->join('damages', 'equipment.id', '=', 'damages.equipment_id')
-                    ->selectRaw('SUM((damages.detail_price * damages.quantity) + damages.craft_price + damages.additional_expense) as total_expense')
+                    ->selectRaw('SUM((detail_price * quantity) + craft_price + additional_expense) as total_expense')
                     ->value('total_expense') ?? 0
             )),
         ];

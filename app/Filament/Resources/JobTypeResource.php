@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\JobTypeResource\Pages;
-use App\Filament\Resources\JobTypeResource\RelationManagers;
 use App\Models\JobType;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class JobTypeResource extends Resource
 {
@@ -29,6 +26,7 @@ class JobTypeResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('title')
                     ->label('სათაური')
+                    ->unique(ignoreRecord: true)
                     ->required()
                     ->maxLength(255),
             ]);

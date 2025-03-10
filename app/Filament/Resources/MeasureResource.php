@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MeasureResource\Pages;
-use App\Filament\Resources\MeasureResource\RelationManagers;
 use App\Models\Measure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MeasureResource extends Resource
 {
@@ -29,6 +26,7 @@ class MeasureResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('title')
                     ->label('სათაური')
+                    ->unique(ignoreRecord: true)
                     ->required(),
                 Forms\Components\TextInput::make('short_title')
                     ->label('მოკ. სათაური'),

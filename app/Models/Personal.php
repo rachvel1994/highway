@@ -9,6 +9,8 @@ class Personal extends Model
     protected $fillable = [
         'full_name',
         'salary',
+        'salary_type',
+        'worked_days',
         'comment'
     ];
 

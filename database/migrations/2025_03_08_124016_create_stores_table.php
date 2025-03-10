@@ -13,12 +13,7 @@ return new class extends Migration
     {
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->integer('quantity')->default(0);
-            $table->foreignId('category_id')->nullable();
-            $table->foreignId('measure_id')->nullable();
-            $table->float('price')->default(0.00);
-            $table->text('comment')->nullable();
+            $table->string('title')->unique();
             $table->timestamps();
         });
     }

@@ -34,7 +34,21 @@ class PersonalResource extends Resource
                 Forms\Components\TextInput::make('salary')
                     ->label('ხელფასი')
                     ->postfix('₾')
+                    ->default(0)
                     ->numeric(),
+                Forms\Components\Select::make('salary_type')
+                    ->label('ხელფასის ტიპი')
+                    ->options([
+                        1 => 'თვიური',
+                        2 => 'დღიური',
+                    ])
+                    ->default(1)
+                    ->reactive(),
+                Forms\Components\TextInput::make('worked_days')
+                    ->label('ნამუშევარი დღეები')
+                    ->numeric()
+                    ->default(0)
+                    ->visible(fn(callable $get) => $get('salary_type') == 2),
                 Forms\Components\Textarea::make('comment')
                     ->rows(5)
                     ->columnSpanFull()
@@ -60,6 +74,18 @@ class PersonalResource extends Resource
                     ->money('GEL')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('salary_type')
+                    ->label('ხელფასის ტიპი')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        1 => 'თვიური',
+                        2 => 'დღიური',
+                        default => $state,
+                    })
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('worked_days')
+                    ->label('ნამუშევარი დღეები')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('comment')
                     ->label('კომენტარი')
                     ->searchable()
@@ -72,6 +98,12 @@ class PersonalResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('salary_type')
+                    ->label('ხელფასის ტიპი')
+                    ->options([
+                        1 => 'თვიური',
+                        2 => 'დღიური',
+                    ]),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
                         DatePicker::make('from')

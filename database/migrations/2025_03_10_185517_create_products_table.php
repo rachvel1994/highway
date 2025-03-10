@@ -10,13 +10,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('personals', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name', 400)->index('full_name');
-            $table->float('salary', 2)->default(0.00);
-            $table->integer('salary_type')->default(1);
-            $table->integer('worked_days')->default(0);
+            $table->foreignId('store_id');
+            $table->string('title');
+            $table->integer('quantity')->default(0);
+            $table->foreignId('category_id')->nullable();
+            $table->foreignId('measure_id')->nullable();
+            $table->float('price')->default(0.00);
             $table->text('comment')->nullable();
+            $table->unique(['store_id', 'title']);
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('personals');
+        Schema::dropIfExists('products');
     }
 };
