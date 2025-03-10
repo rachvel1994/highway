@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\EquipmentRelationResource\RelationManagers\DamagesRelationManager;
 use App\Filament\Resources\EquipmentResource\Pages;
 use App\Models\Equipment;
 use Exception;
@@ -24,7 +25,8 @@ class EquipmentResource extends Resource
     protected static ?string $breadcrumb = 'ტექნიკა';
 
     protected static ?string $modelLabel = 'ტექნიკა';
-
+    protected static ?string $navigationGroup = 'ტექნიკა';
+    protected static ?int $navigationSort = 1;
     public static function form(Form $form): Form
     {
         return $form
@@ -81,6 +83,13 @@ class EquipmentResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            DamagesRelationManager::class
+        ];
     }
 
     public static function getPages(): array

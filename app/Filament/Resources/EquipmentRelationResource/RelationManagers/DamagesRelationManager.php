@@ -1,32 +1,23 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\EquipmentRelationResource\RelationManagers;
 
-use App\Filament\Resources\DamageResource\Pages;
-use App\Filament\Resources\DamageResource\RelationManagers\EquipmentRelationManager;
-use App\Models\Damage;
+use App\Filament\Resources\DamageResource;
+use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class DamageResource extends Resource
+class DamagesRelationManager extends RelationManager
 {
-    protected static ?string $model = Damage::class;
-    protected static ?string $navigationLabel = 'დაზიანება';
+    protected static string $relationship = 'damages';
 
-    protected static ?string $breadcrumb = 'დაზიანება';
-
-    protected static ?string $modelLabel = 'დაზიანება';
-    protected static ?string $navigationIcon = 'heroicon-o-cog';
-
-    protected static ?string $navigationGroup = 'ტექნიკა';
-    protected static ?int $navigationSort = 2;
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
@@ -67,9 +58,13 @@ class DamageResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
+    /**
+     * @throws Exception
+     */
+    public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('title')
             ->columns([
                 Tables\Columns\TextColumn::make('equipment_id')
                     ->label('ტექნიკა')
@@ -145,8 +140,12 @@ class DamageResource extends Resource
                             });
                     })
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -155,19 +154,7 @@ class DamageResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            EquipmentRelationManager::class
-        ];
-    }
+    protected static ?string $modelLabel = 'დაზიანება';
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListDamages::route('/'),
-            'create' => Pages\CreateDamage::route('/create'),
-            'edit' => Pages\EditDamage::route('/{record}/edit'),
-        ];
-    }
+    protected static ?string $title = 'დაზიანება';
 }
