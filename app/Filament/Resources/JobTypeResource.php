@@ -19,7 +19,8 @@ class JobTypeResource extends Resource
 
     protected static ?string $modelLabel = 'სამუშაო ტიპი';
     protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
-
+    protected static ?string $navigationGroup = 'ობიექტი';
+    protected static ?int $navigationSort = 3;
     public static function form(Form $form): Form
     {
         return $form

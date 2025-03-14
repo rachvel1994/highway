@@ -10,6 +10,8 @@ class WorkAsset extends Model
     protected $fillable = [
         'street',
         'equipment_id',
+        'item_type_id',
+        'item_quantity',
         'personal_id',
         'company_id',
         'job_type_id',
@@ -40,6 +42,11 @@ class WorkAsset extends Model
     public function jobType(): BelongsTo
     {
         return $this->belongsTo(JobType::class, 'job_type_id', 'id');
+    }
+
+    public function itemType(): BelongsTo
+    {
+        return $this->belongsTo(ItemType::class, 'item_type_id', 'id');
     }
 
     public function measure(): BelongsTo

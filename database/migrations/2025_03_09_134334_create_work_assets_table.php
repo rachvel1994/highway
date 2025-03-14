@@ -17,13 +17,13 @@ return new class extends Migration
             $table->foreignId('equipment_id')->nullable();
             $table->foreignId('personal_id')->nullable();
             $table->foreignId('company_id')->nullable();
+            $table->foreignId('item_type_id')->nullable();
+            $table->integer('item_quantity')->default(0);
             $table->foreignId('job_type_id')->nullable();
             $table->foreignId('measure_id')->nullable();
             $table->string('traveled_km')->nullable();
             $table->time('time_spend')->nullable();
             $table->string('fuel_spend')->nullable();
-            $table->text('failure')->nullable();
-            $table->text('taken_items')->nullable();
             $table->text('comment')->nullable();
             $table->timestamps();
         });

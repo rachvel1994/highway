@@ -58,7 +58,7 @@ class ProductResource extends Resource
                         ->preload()
                         ->relationship('category', 'title'),
                     Forms\Components\Select::make('measure_id')
-                        ->label('ზომის ერთეული')
+                        ->label('საზომი ერთეული')
                         ->searchable()
                         ->preload()
                         ->relationship('measure', 'short_title'),
@@ -100,7 +100,7 @@ class ProductResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('measure.short_title')
-                    ->label('ზომის ერთეული')
+                    ->label('საზომი ერთეული')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('comment')
@@ -123,7 +123,7 @@ class ProductResource extends Resource
                     ->preload()
                     ->relationship('category', 'title'),
                 Tables\Filters\SelectFilter::make('measure_id')
-                    ->label(__('ზომის ერთეული'))
+                    ->label(__('საზომი ერთეული'))
                     ->preload()
                     ->relationship('measure', 'short_title'),
                 Tables\Filters\Filter::make('created_at')

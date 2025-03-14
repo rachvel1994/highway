@@ -36,7 +36,6 @@ class StoreResource extends Resource
                     ->label('სახელი')
                     ->unique(ignoreRecord: true)
                     ->required()
-                    ->columnSpanFull()
                     ->maxLength(255),
             ]);
     }

@@ -19,8 +19,11 @@ class PersonalTotalExpense extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('ხარჯი', money($this->getPageTableQuery()->sum('salary'))),
-        ];
+            Stat::make('ხარჯი', money(
+                $this->getPageTableQuery()
+                    ->selectRaw('SUM(CASE WHEN salary_type = 2 THEN salary * worked_days ELSE salary END) AS total_salary')
+                    ->value('total_salary')
+            ))        ];
     }
 }
 
