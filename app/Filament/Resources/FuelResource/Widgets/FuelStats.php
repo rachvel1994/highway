@@ -7,7 +7,7 @@ use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class FuelTotalExpense extends StatsOverviewWidget
+class FuelStats extends StatsOverviewWidget
 {
     use InteractsWithPageTable;
 
@@ -20,8 +20,12 @@ class FuelTotalExpense extends StatsOverviewWidget
     {
         return [
             Stat::make('ხარჯი', money($this->getPageTableQuery()
-                ->selectRaw('SUM((price * quantity) - (price * remain)) as total_expense')
-                ->value('total_expense')))
+                ->selectRaw('SUM((price * quantity)) as total_expense')
+                ->value('total_expense'))),
+            Stat::make('რაოდენობა', money($this->getPageTableQuery()
+                ->sum('quantity'))),
+            Stat::make('ნაშთი', money($this->getPageTableQuery()
+                ->sum('remain')))
         ];
     }
 }

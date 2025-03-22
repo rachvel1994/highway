@@ -23,7 +23,7 @@ class ListFuels extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            FuelResource\Widgets\FuelTotalExpense::class
+            FuelResource\Widgets\FuelStats::class
         ];
     }
 }

@@ -29,7 +29,8 @@ class MeasureResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->required(),
                 Forms\Components\TextInput::make('short_title')
-                    ->label('მოკ. სათაური'),
+                    ->label('მოკ. სათაური')
+                    ->required(),
                 Forms\Components\Textarea::make('comment')
                     ->rows(5)
                     ->columnSpanFull()
