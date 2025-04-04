@@ -3,54 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkAsset extends Model
 {
     protected $fillable = [
         'street',
-        'equipment_id',
-        'item_type_id',
-        'item_quantity',
-        'personal_id',
-        'company_id',
-        'job_type_id',
-        'measure_id',
-        'traveled_km',
-        'time_spend',
-        'fuel_spend',
-        'failure',
-        'taken_items',
-        'comment',
+        'is_completed',
     ];
 
-    public function equipment(): BelongsTo
+    public function details(): HasMany
     {
-        return $this->belongsTo(Equipment::class, 'equipment_id', 'id');
-    }
-
-    public function personal(): BelongsTo
-    {
-        return $this->belongsTo(Personal::class, 'personal_id', 'id');
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class, 'company_id', 'id');
-    }
-
-    public function jobType(): BelongsTo
-    {
-        return $this->belongsTo(JobType::class, 'job_type_id', 'id');
-    }
-
-    public function itemType(): BelongsTo
-    {
-        return $this->belongsTo(ItemType::class, 'item_type_id', 'id');
-    }
-
-    public function measure(): BelongsTo
-    {
-        return $this->belongsTo(Measure::class, 'measure_id', 'id');
+        return $this->hasMany(WorkAssetDetail::class, 'work_asset_id');
     }
 }

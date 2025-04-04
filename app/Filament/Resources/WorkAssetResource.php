@@ -3,10 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WorkAssetResource\Pages;
+use App\Models\CompanyItem;
+use App\Models\Product;
 use App\Models\WorkAsset;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -30,66 +33,108 @@ class WorkAssetResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\TextInput::make('street')
-                        ->label('ქუჩა')
-                        ->unique(ignoreRecord: true)
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('fuel_spend')
-                        ->label('მოხმარებული საწვავი')
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('traveled_km')
-                        ->label('გავლილი კმ')
-                        ->maxLength(255),
-                ]),
-                Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\Select::make('equipment_id')
-                        ->label('ტექნიკა')
-                        ->searchable()
-                        ->preload()
-                        ->relationship('equipment', 'equipment'),
-                    Forms\Components\Select::make('personal_id')
-                        ->label('პერსონალი')
-                        ->searchable()
-                        ->preload()
-                        ->relationship('personal', 'full_name'),
-                    Forms\Components\Select::make('company_id')
-                        ->label('კომპანია')
-                        ->searchable()
-                        ->preload()
-                        ->relationship('company', 'title'),
-                ]),
-                Forms\Components\Select::make('item_type_id')
-                    ->label('ნივთის ტიპი')
-                    ->searchable()
-                    ->preload()
-                    ->relationship('itemType', 'title'),
-                Forms\Components\TextInput::make('item_quantity')
-                    ->label('ნივთის რაოდენობა')
+                Forms\Components\TextInput::make('street')
+                    ->label('ქუჩა')
+                    ->unique(ignoreRecord: true)
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Toggle::make('is_completed')
                     ->default(0)
-                    ->numeric(),
-                Forms\Components\Grid::make(3)->schema([
-                    Forms\Components\Select::make('job_type_id')
-                        ->label('სამუშაო ტიპი')
-                        ->searchable()
-                        ->preload()
-                        ->relationship('jobType', 'title'),
-                    Forms\Components\Select::make('measure_id')
-                        ->label('საზომი ერთეული')
-                        ->searchable()
-                        ->preload()
-                        ->relationship('measure', 'title'),
-                    Forms\Components\TextInput::make('time_spend')
-                        ->label('მოხმარებული დრო'),
-                ]),
-                Forms\Components\Textarea::make('failure')
-                    ->label('ცდენა')
-                    ->rows(5)
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('comment')
-                    ->label('კომენტარი')
-                    ->rows(5)
+                    ->label('სამუშაო დასრულბულია')
+                    ->required(),
+                Repeater::make('workAssetEquipments')
+                    ->relationship('details')
+                    ->label('ობიექტის დეტალები')
+                    ->schema([
+                        Forms\Components\Grid::make(5)->schema([
+                            Forms\Components\Select::make('job_type_id')
+                                ->label('სამუშაო ტიპი')
+                                ->searchable()
+                                ->preload()
+                                ->relationship('jobType', 'title'),
+                            Forms\Components\Select::make('equipment_id')
+                                ->label('ტექნიკა')
+                                ->searchable()
+                                ->preload()
+                                ->relationship('equipment', 'equipment'),
+                            Forms\Components\Select::make('personal_id')
+                                ->label('პერსონალი')
+                                ->searchable()
+                                ->preload()
+                                ->relationship('personal', 'full_name'),
+                            Forms\Components\TextInput::make('time_spend')
+                                ->label('მოხმარებული დრო')
+                                ->default(0)
+                                ->numeric(),
+                            Forms\Components\TextInput::make('completed_trip')
+                                ->label('რეისის რაოდენობა')
+                                ->default(0)
+                                ->numeric(),
+                        ]),
+                        Forms\Components\Grid::make(4)->schema([
+                            Forms\Components\TextInput::make('fuel_spend')
+                                ->label('მოხმარებული საწვავი')
+                                ->default(0)
+                                ->numeric(),
+                            Forms\Components\Select::make('company_id')
+                                ->label('კომპანია')
+                                ->searchable()
+                                ->preload()
+                                ->relationship('company', 'title')
+                                ->reactive()
+                                ->afterStateUpdated(fn(callable $set) => $set('company_item_id', null)),
+                            Forms\Components\Select::make('company_item_id')
+                                ->label('მასალის დასახელება')
+                                ->searchable()
+                                ->preload()
+                                ->options(fn(Forms\Get $get) => $get('company_id')
+                                    ? CompanyItem::where('company_id', $get('company_id'))->pluck('title', 'id')->toArray()
+                                    : []
+                                )
+                                ->reactive()
+                                ->disabled(fn(Forms\Get $get) => !$get('store_id')),
+                            Forms\Components\TextInput::make('company_item_quantity')
+                                ->label('მასალის რაოდენობა')
+                                ->default(0)
+                                ->numeric(),
+                        ]),
+                        Forms\Components\Grid::make(4)->schema([
+                            Forms\Components\Select::make('store_id')
+                                ->label('მაღაზიის დასახელება')
+                                ->searchable()
+                                ->preload()
+                                ->relationship('store', 'title')
+                                ->reactive()
+                                ->afterStateUpdated(fn(callable $set) => $set('store_product_id', null)),
+                            Forms\Components\Select::make('store_product_id')
+                                ->label('პროდუქცია')
+                                ->searchable()
+                                ->preload()
+                                ->options(fn(Forms\Get $get) => $get('store_id')
+                                    ? Product::where('store_id', $get('store_id'))->pluck('title', 'id')->toArray()
+                                    : []
+                                )
+                                ->reactive()
+                                ->afterStateUpdated(fn (callable $set, callable $get) =>
+                                $set('store_product_price', Product::where('id', $get('store_product_id'))->value('price') ?? 0)
+                                )
+                                ->prefix('₾')
+                                ->disabled(fn(Forms\Get $get) => !$get('store_id')),
+                            Forms\Components\TextInput::make('store_product_quantity')
+                                ->label('პროდუქციის რაოდენობა')
+                                ->default(0)
+                                ->numeric()
+                                ->reactive(),
+                            Forms\Components\TextInput::make('store_product_price')
+                                ->label('პროდუქციის ფასი')
+                                ->default(0)
+                                ->numeric(),
+                        ]),
+                    ])
+                    ->orderColumn('created_at')
+                    ->collapsed()
+                    ->cloneable()
+                    ->addActionLabel('ობიექტის დეტალების დამატება')
                     ->columnSpanFull(),
             ]);
     }
@@ -106,46 +151,9 @@ class WorkAssetResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('equipment.equipment')
-                    ->label('ტექნიკა')
-                    ->sortable()
+                Tables\Columns\ToggleColumn::make('is_completed')
+                    ->label('სამუშაო დასრულბულია')
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('itemType.title')
-                    ->label('ნივთის ტიპი')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('item_quantity')
-                    ->label('ნივთის რაოდენობა')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('personal.full_name')
-                    ->label('პერსონალი')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('company.title')
-                    ->label('კომპანია')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('jobType.title')
-                    ->label('სამუშაო ტიპი')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('measure.title')
-                    ->label('საზომი ერთეული')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('traveled_km')
-                    ->label('გავლილი კმ')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('time_spend')
-                    ->label('მოხმარებული დრო')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('fuel_spend')
-                    ->label('მოხმარებული საწვავი')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('დამატების თარიღი')
                     ->dateTime()
@@ -153,30 +161,12 @@ class WorkAssetResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('equipment_id')
-                    ->label(__('ტექნიკა'))
-                    ->preload()
-                    ->relationship('equipment', 'equipment'),
-                Tables\Filters\SelectFilter::make('item_type_id')
-                    ->label(__('ნივთის ტიპი'))
-                    ->preload()
-                    ->relationship('itemType', 'title'),
-                Tables\Filters\SelectFilter::make('personal_id')
-                    ->label(__('პერსონალი'))
-                    ->preload()
-                    ->relationship('personal', 'full_name'),
-                Tables\Filters\SelectFilter::make('company_id')
-                    ->label(__('კომპანია'))
-                    ->preload()
-                    ->relationship('company', 'title'),
-                Tables\Filters\SelectFilter::make('company_id')
-                    ->label(__('კომპანია'))
-                    ->preload()
-                    ->relationship('company', 'title'),
-                Tables\Filters\SelectFilter::make('job_type_id')
-                    ->label(__('სამუშაო ტიპი'))
-                    ->preload()
-                    ->relationship('jobType', 'title'),
+                Tables\Filters\SelectFilter::make('is_completed')
+                    ->label('სამუშაო დასრულბულია')
+                    ->options([
+                        '0' => 'არ არის დასრულებული',
+                        '1' => 'დასრულებულია',
+                    ]),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
                         DatePicker::make('from')

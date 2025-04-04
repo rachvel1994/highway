@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,18 +12,7 @@ return new class extends Migration
     {
         Schema::create('work_assets', function (Blueprint $table) {
             $table->id();
-            $table->string('street');
-            $table->foreignId('equipment_id')->nullable();
-            $table->foreignId('personal_id')->nullable();
-            $table->foreignId('company_id')->nullable();
-            $table->foreignId('item_type_id')->nullable();
-            $table->integer('item_quantity')->default(0);
-            $table->foreignId('job_type_id')->nullable();
-            $table->foreignId('measure_id')->nullable();
-            $table->string('traveled_km')->nullable();
-            $table->time('time_spend')->nullable();
-            $table->string('fuel_spend')->nullable();
-            $table->text('comment')->nullable();
+            $table->string('street')->unique()->integer('street');
             $table->timestamps();
         });
     }

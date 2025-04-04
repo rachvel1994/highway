@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('factories', function (Blueprint $table) {
+        Schema::create('company_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id');
             $table->string('title');
-            $table->string('damage', 800)->nullable();
-            $table->string('detail_name', 800)->nullable();
             $table->integer('quantity')->default(0);
-            $table->float('detail_price', 2)->default(0.00);
-            $table->float('craft_price', 2)->default(0.00);
-            $table->string('craftsman')->nullable();
-            $table->float('additional_expense', 2)->default(0.00);
+            $table->foreignId('category_id')->nullable();
+            $table->foreignId('measure_id')->nullable();
+            $table->float('price')->default(0.00);
             $table->text('comment')->nullable();
+            $table->unique(['company_id', 'title']);
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('factories');
+        Schema::dropIfExists('company_items');
     }
 };

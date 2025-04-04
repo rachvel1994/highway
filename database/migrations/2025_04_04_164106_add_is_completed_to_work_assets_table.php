@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('item_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('title')->unique();
-            $table->float('price', 2)->default(0.00);
-            $table->timestamps();
+        Schema::table('work_assets', function (Blueprint $table) {
+            $table->boolean('is_completed')->default(0);
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('item_types');
+        Schema::table('work_assets', function (Blueprint $table) {
+            $table->dropColumn('is_completed');
+        });
     }
 };
