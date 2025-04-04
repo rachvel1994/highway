@@ -9,6 +9,12 @@ class Equipment extends Model
 {
     protected $fillable = [
         'equipment',
+        'type',
+        'price',
+    ];
+
+    protected $casts = [
+        'price' => 'float'
     ];
 
     public function damages(): HasMany

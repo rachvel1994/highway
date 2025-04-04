@@ -8,6 +8,7 @@ use App\Models\Equipment;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,6 +28,7 @@ class EquipmentResource extends Resource
     protected static ?string $modelLabel = 'ტექნიკა';
     protected static ?string $navigationGroup = 'ტექნიკა';
     protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -34,7 +36,22 @@ class EquipmentResource extends Resource
                 Forms\Components\TextInput::make('equipment')
                     ->label('ტექნიკა')
                     ->unique(ignoreRecord: true)
+                    ->required(),
+                Forms\Components\Select::make('type')
+                    ->label('ტიპი')
+                    ->options([
+                        'main' => 'საკუთარი',
+                        'rent' => 'ნაქირავები',
+                    ])
                     ->required()
+                    ->reactive(),
+                Forms\Components\TextInput::make('price')
+                    ->label('ფასი')
+                    ->default(0)
+                    ->minValue(0)
+                    ->prefix('₾')
+                    ->numeric()
+                    ->visible(fn (Forms\Get $get) => $get('type') == 'rent'),
             ]);
     }
 
@@ -50,6 +67,22 @@ class EquipmentResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('ტიპი')
+                    ->searchable()
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'main' => 'საკუთარი',
+                        'rent' => 'ნაქირავები',
+                        default => $state,
+                    })
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('price')
+                    ->label('ფასი')
+                    ->searchable()
+                    ->sortable()
+                    ->suffix(' ₾')
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('დამატების თარიღი')
                     ->date()
@@ -57,6 +90,32 @@ class EquipmentResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('ტიპი')
+                    ->options([
+                        'main' => 'საკუთარი',
+                        'rent' => 'ნაქირავები',
+                    ]),
+                Tables\Filters\Filter::make('price')
+                    ->form([
+                        TextInput::make('from')
+                            ->label('მინ. ფასი')
+                            ->numeric()
+                            ->debounce(),
+                        TextInput::make('to')
+                            ->label('მაქს. ფასი')
+                            ->numeric()
+                            ->debounce(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['from'], function (Builder $query, ?string $from) {
+                                $query->where('price', '>=', $from * 100);
+                            })
+                            ->when($data['to'], function (Builder $query, ?string $to) {
+                                $query->where('price', '<=', $to * 100);
+                            });
+                    }),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
                         DatePicker::make('from')
