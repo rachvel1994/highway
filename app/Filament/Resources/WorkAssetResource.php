@@ -118,7 +118,6 @@ class WorkAssetResource extends Resource
                                 ->afterStateUpdated(fn (callable $set, callable $get) =>
                                 $set('store_product_price', Product::where('id', $get('store_product_id'))->value('price') ?? 0)
                                 )
-                                ->prefix('₾')
                                 ->disabled(fn(Forms\Get $get) => !$get('store_id')),
                             Forms\Components\TextInput::make('store_product_quantity')
                                 ->label('პროდუქციის რაოდენობა')
@@ -128,6 +127,7 @@ class WorkAssetResource extends Resource
                             Forms\Components\TextInput::make('store_product_price')
                                 ->label('პროდუქციის ფასი')
                                 ->default(0)
+                                ->prefix('₾')
                                 ->numeric(),
                         ]),
                     ])
