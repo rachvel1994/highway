@@ -13,10 +13,6 @@ return new class extends Migration {
         Schema::create('personals', function (Blueprint $table) {
             $table->id();
             $table->string('full_name', 400)->index('full_name');
-            $table->float('salary', 2)->default(0.00);
-            $table->integer('salary_type')->default(1);
-            $table->integer('worked_days')->default(0);
-            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }

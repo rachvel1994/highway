@@ -23,6 +23,11 @@ class WorkAssetDetail extends Model
         'store_product_id',
         'store_product_quantity',
         'store_product_price',
+        'person_salary',
+        'person_salary_type',
+        'person_worked_days',
+        'person_worked_quantity',
+        'person_salary_total',
     ];
 
     public function workAsset(): BelongsTo

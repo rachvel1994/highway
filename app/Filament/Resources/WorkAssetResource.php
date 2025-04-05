@@ -46,7 +46,7 @@ class WorkAssetResource extends Resource
                     ->relationship('details')
                     ->label('ობიექტის დეტალები')
                     ->schema([
-                        Forms\Components\Grid::make(5)->schema([
+                        Forms\Components\Grid::make(4)->schema([
                             Forms\Components\Select::make('job_type_id')
                                 ->label('სამუშაო ტიპი')
                                 ->searchable()
@@ -57,11 +57,6 @@ class WorkAssetResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->relationship('equipment', 'equipment'),
-                            Forms\Components\Select::make('personal_id')
-                                ->label('პერსონალი')
-                                ->searchable()
-                                ->preload()
-                                ->relationship('personal', 'full_name'),
                             Forms\Components\TextInput::make('time_spend')
                                 ->label('მოხმარებული დრო')
                                 ->default(0)
@@ -115,8 +110,7 @@ class WorkAssetResource extends Resource
                                     : []
                                 )
                                 ->reactive()
-                                ->afterStateUpdated(fn (callable $set, callable $get) =>
-                                $set('store_product_price', Product::where('id', $get('store_product_id'))->value('price') ?? 0)
+                                ->afterStateUpdated(fn(callable $set, callable $get) => $set('store_product_price', Product::where('id', $get('store_product_id'))->value('price') ?? 0)
                                 )
                                 ->disabled(fn(Forms\Get $get) => !$get('store_id')),
                             Forms\Components\TextInput::make('store_product_quantity')
@@ -130,6 +124,54 @@ class WorkAssetResource extends Resource
                                 ->prefix('₾')
                                 ->numeric(),
                         ]),
+                        Forms\Components\Grid::make(5)
+                            ->schema([
+                                Forms\Components\Select::make('personal_id')
+                                    ->label('პერსონალი')
+                                    ->searchable()
+                                    ->preload()
+                                    ->relationship('personal', 'full_name')
+                                    ->reactive(),
+                                Forms\Components\TextInput::make('person_salary')
+                                    ->label('ხელფასი')
+                                    ->postfix('₾')
+                                    ->default(0)
+                                    ->numeric()
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get))
+                                    ->visible(fn(Forms\Get $get) => !empty($get('personal_id'))),
+                                Forms\Components\Select::make('person_salary_type')
+                                    ->label('ხელფასის ტიპი')
+                                    ->options([
+                                        1 => 'თვიური',
+                                        2 => 'დღიური',
+                                        3 => 'გამომუშავება',
+                                    ])
+                                    ->default(1)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get))
+                                    ->visible(fn(callable $get) => !empty($get('personal_id'))),
+                                Forms\Components\TextInput::make('person_worked_days')
+                                    ->label('ნამუშევარი დღეები')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get))
+                                    ->visible(fn(callable $get) => $get('person_salary_type') == 2),
+                                Forms\Components\TextInput::make('person_worked_quantity')
+                                    ->label('რაოდენობა')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->reactive()
+                                    ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get))
+                                    ->visible(fn(callable $get) => $get('person_salary_type') == 3),
+                                Forms\Components\TextInput::make('person_salary_total')
+                                    ->label('ხელფასის ჯამი')
+                                    ->postfix('₾')
+                                    ->default(0)
+                                    ->numeric()
+                                    ->visible(fn(Forms\Get $get) => !empty($get('personal_id'))),
+                            ])
                     ])
                     ->orderColumn('created_at')
                     ->collapsed()
@@ -211,4 +253,5 @@ class WorkAssetResource extends Resource
             'edit' => Pages\EditWorkAsset::route('/{record}/edit'),
         ];
     }
+
 }
