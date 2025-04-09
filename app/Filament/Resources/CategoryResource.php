@@ -36,7 +36,6 @@ class CategoryResource extends Resource
                     ->options([
                         1 => 'პროდუქტი',
                         2 => 'ნივთი',
-                        3 => 'ობიექტი',
                     ])
                     ->required()
             ]);
@@ -60,7 +59,6 @@ class CategoryResource extends Resource
                     ->formatStateUsing(fn($state) => match ($state) {
                         1 => 'პროდუქტი',
                         2 => 'ნივთი',
-                        3 => 'ობიექტი',
                         default => $state,
                     })
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -76,7 +74,6 @@ class CategoryResource extends Resource
                     ->options([
                         1 => 'პროდუქტი',
                         2 => 'ნივთი',
-                        3 => 'ობიექტი',
                     ])
             ])
             ->actions([

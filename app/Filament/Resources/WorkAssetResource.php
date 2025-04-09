@@ -396,12 +396,55 @@ class WorkAssetResource extends Resource
                 Tables\Filters\SelectFilter::make('details.job_type_id')
                     ->label('სამუშაო ტიპი')
                     ->relationship('details.jobType', 'title'),
-                Tables\Filters\SelectFilter::make('is_completed')
-                    ->label('სამუშაო დასრულბულია')
-                    ->options([
-                        '0' => 'არ არის დასრულებული',
-                        '1' => 'დასრულებულია',
-                    ]),
+
+                Tables\Filters\Filter::make('grand_total')
+                    ->form([
+                        DatePicker::make('min_total')
+                            ->label('მინ. სრული ჯამი')
+                            ->debounce(),
+                        DatePicker::make('max_total')
+                            ->label('მაქს. სრული ჯამი')
+                            ->debounce(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['min_total'], function (Builder $query, ?string $minTotal) {
+                                $query->where('grand_total', '>=', $minTotal);
+                            })
+                            ->when($data['max_total'], function (Builder $query, ?string $maxTotal) {
+                                $query->where('grand_total', '<=', $maxTotal);
+                            });
+                    }),
+                Tables\Filters\Filter::make('money')
+                    ->form([
+                        DatePicker::make('min')
+                            ->label('მინ. თანხა')
+                            ->debounce(),
+                        DatePicker::make('max')
+                            ->label('მაქს. თანხა')
+                            ->debounce(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['min'], function (Builder $query, ?string $min) {
+                                $query->where('fuel_price', '>=', $min)
+                                    ->orWhere('fuel_total_price', '>=', $min)
+                                    ->orWhere('item_price', '>=', $min)
+                                    ->orWhere('item_total_price', '>=', $min)
+                                    ->orWhere('product_price', '>=', $min)
+                                    ->orWhere('product_price_total', '>=', $min)
+                                    ->orWhere('person_salary_total', '>=', $min);
+                            })
+                            ->when($data['max'], function (Builder $query, ?string $max) {
+                                $query->where('fuel_price', '<=', $max)
+                                    ->orWhere('fuel_total_price', '<=', $max)
+                                    ->orWhere('item_price', '<=', $max)
+                                    ->orWhere('item_total_price', '<=', $max)
+                                    ->orWhere('product_price', '<=', $max)
+                                    ->orWhere('product_price_total', '<=', $max)
+                                    ->orWhere('person_salary_total', '<=', $max);
+                            });
+                    }),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
                         DatePicker::make('from')
@@ -461,13 +504,10 @@ class WorkAssetResource extends Resource
 
     private static function calculateGrandTotal(array $row): float
     {
-        // Ensure time is numeric
         $workedTime = is_numeric($row['time_spend']) ? (float)$row['time_spend'] : 0;
 
-        // Fetch equipment
         $equipment = getEquipmentById($row['equipment_id']);
 
-        // Base total
         $total = $row['fuel_total_price'] + $row['item_total_price'] + $row['product_price_total'] + $row['person_salary_total'];
 
         if ($equipment) {

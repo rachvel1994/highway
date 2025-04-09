@@ -30,7 +30,7 @@ class Product extends Model
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class, 'category_id', 'id');
+        return $this->belongsTo(Category::class, 'category_id', 'id')->where('type_id', 1);
     }
 
     public function measure(): BelongsTo
