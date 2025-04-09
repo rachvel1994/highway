@@ -13,6 +13,8 @@ return new class extends Migration {
         Schema::create('work_assets', function (Blueprint $table) {
             $table->id();
             $table->string('street')->unique()->integer('street');
+            $table->decimal('grand_total', 10, 2)->default(0);
+            $table->boolean('is_completed')->default(0);
             $table->timestamps();
         });
     }

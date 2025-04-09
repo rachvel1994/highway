@@ -32,7 +32,7 @@ class StoreResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')
+                Forms\Components\TextInput::make('store')
                     ->label('სახელი')
                     ->unique(ignoreRecord: true)
                     ->required()
@@ -47,7 +47,7 @@ class StoreResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
+                Tables\Columns\TextColumn::make('store')
                     ->label('სახელი')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),

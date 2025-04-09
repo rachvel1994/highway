@@ -12,17 +12,23 @@ class WorkAssetDetail extends Model
         'work_asset_id',
         'job_type_id',
         'equipment_id',
-        'personal_id',
         'time_spend',
         'completed_trip',
+        'fuel_id',
+        'fuel_price',
         'fuel_spend',
-        'company_item_id',
-        'company_item_quantity',
+        'fuel_total_price',
         'company_id',
+        'item_id',
+        'item_price',
+        'item_quantity',
+        'item_total_price',
         'store_id',
         'store_product_id',
-        'store_product_quantity',
-        'store_product_price',
+        'product_price',
+        'product_quantity',
+        'product_price_total',
+        'personal_id',
         'person_salary',
         'person_salary_type',
         'person_worked_days',
@@ -50,9 +56,14 @@ class WorkAssetDetail extends Model
         return $this->belongsTo(Personal::class);
     }
 
-    public function itemType(): BelongsTo
+    public function fuel(): BelongsTo
     {
-        return $this->belongsTo(ItemType::class);
+        return $this->belongsTo(Fuel::class);
+    }
+
+    public function companyItem(): BelongsTo
+    {
+        return $this->belongsTo(CompanyItem::class, 'item_id');
     }
 
     public function company(): BelongsTo
@@ -68,25 +79,5 @@ class WorkAssetDetail extends Model
     public function storeProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'store_product_id');
-    }
-
-    public function getTimeSpendFormattedAttribute(): string
-    {
-        return number_format($this->time_spend, 2);
-    }
-
-    public function getFuelSpendFormattedAttribute(): string
-    {
-        return number_format($this->fuel_spend, 2);
-    }
-
-    public function getStoreProductQuantityFormattedAttribute(): string
-    {
-        return number_format($this->store_product_quantity, 2);
-    }
-
-    public function getStoreProductPriceFormattedAttribute(): string
-    {
-        return number_format($this->store_product_price, 2);
     }
 }

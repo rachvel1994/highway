@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FactoryResource\Pages;
-use App\Filament\Resources\FactoryResource\RelationManagers;
 use App\Models\Factory;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -12,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FactoryResource extends Resource
 {

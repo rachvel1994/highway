@@ -49,7 +49,7 @@ class EquipmentResource extends Resource
                     ->label('ფასი')
                     ->default(0)
                     ->minValue(0)
-                    ->prefix('₾')
+                    ->postfix('₾')
                     ->numeric()
                     ->visible(fn (Forms\Get $get) => $get('type') == 'rent'),
             ]);

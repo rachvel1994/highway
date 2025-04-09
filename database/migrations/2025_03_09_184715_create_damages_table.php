@@ -21,6 +21,7 @@ return new class extends Migration
             $table->float('craft_price', 2)->default(0.00);
             $table->string('craftsman')->nullable();
             $table->float('additional_expense', 2)->default(0.00);
+            $table->decimal('total_price', 10)->default(0);
             $table->text('comment')->nullable();
             $table->timestamps();
         });

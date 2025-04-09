@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('work_assets', function (Blueprint $table) {
-            $table->boolean('is_completed')->default(0);
+        Schema::table('stores', function (Blueprint $table) {
+            $table->renameColumn('title', 'store');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('work_assets', function (Blueprint $table) {
-            $table->dropColumn('is_completed');
+        Schema::table('stores', function (Blueprint $table) {
+            //
         });
     }
 };

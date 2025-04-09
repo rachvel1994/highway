@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Models\Category;
+use Exception;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -30,9 +31,20 @@ class CategoryResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('type_id')
+                    ->label('კატეგორიის ტიპი')
+                    ->options([
+                        1 => 'პროდუქტი',
+                        2 => 'ნივთი',
+                        3 => 'ობიექტი',
+                    ])
+                    ->required()
             ]);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -41,6 +53,17 @@ class CategoryResource extends Resource
                     ->label('სახელი')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('type_id')
+                    ->label('კატეგორიის ტიპი')
+                    ->searchable()
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        1 => 'პროდუქტი',
+                        2 => 'ნივთი',
+                        3 => 'ობიექტი',
+                        default => $state,
+                    })
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('დამატების თარიღი')
                     ->dateTime()
@@ -48,7 +71,13 @@ class CategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('type_id')
+                    ->label('კატეგორიის ტიპი')
+                    ->options([
+                        1 => 'პროდუქტი',
+                        2 => 'ნივთი',
+                        3 => 'ობიექტი',
+                    ])
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

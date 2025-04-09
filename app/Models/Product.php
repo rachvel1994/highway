@@ -14,12 +14,13 @@ class Product extends Model
         'category_id',
         'measure_id',
         'price',
+        'total_price',
         'comment',
     ];
 
     protected $casts = [
         'price' => 'float',
-        'total_expense' => 'float',
+        'total_price' => 'float',
     ];
 
     public function store(): BelongsTo

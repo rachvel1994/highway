@@ -14,11 +14,13 @@ class CompanyItem extends Model
         'category_id',
         'measure_id',
         'price',
+        'total_price',
         'comment',
     ];
 
     protected $casts = [
         'price' => 'float',
+        'total_price' => 'float',
         'total_expense' => 'float',
     ];
 

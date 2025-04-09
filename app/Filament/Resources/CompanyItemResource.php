@@ -3,10 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CompanyItemResource\Pages;
+use App\Filament\Resources\CompanyItemResource\RelationManagers\CompanyRelationManager;
 use App\Models\CompanyItem;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -34,25 +36,34 @@ class CompanyItemResource extends Resource
                 Forms\Components\Select::make('company_id')
                     ->label('კომპანია')
                     ->preload()
-                    ->unique(ignoreRecord: true)
-                    ->relationship('company', 'title')
+                    ->relationship('company', 'company')
                     ->required(),
                 Forms\Components\TextInput::make('title')
                     ->label('სახელი')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Grid::make(4)->schema([
+                Forms\Components\Grid::make(5)->schema([
                     Forms\Components\TextInput::make('price')
                         ->label('ფასი')
                         ->required()
                         ->numeric()
                         ->default(0)
-                        ->postfix('₾'),
+                        ->postfix('₾')
+                        ->reactive()
+                        ->afterStateUpdated(fn(callable $set, callable $get) => $set('total_price', $get('price') * $get('quantity'))),
                     Forms\Components\TextInput::make('quantity')
                         ->label('რაოდენობა')
                         ->required()
                         ->numeric()
-                        ->default(0),
+                        ->default(0)
+                        ->reactive()
+                        ->afterStateUpdated(fn(callable $set, callable $get) => $set('total_price', $get('price') * $get('quantity'))),
+                    Forms\Components\TextInput::make('total_price')
+                        ->label('ჯამური ფასი')
+                        ->required()
+                        ->numeric()
+                        ->default(0)
+                        ->postfix('₾'),
                     Forms\Components\Select::make('category_id')
                         ->label('კატეგორია')
                         ->searchable()
@@ -78,7 +89,7 @@ class CompanyItemResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('company.title')
+                Tables\Columns\TextColumn::make('company.company')
                     ->label('კომპანია')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -88,6 +99,11 @@ class CompanyItemResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('price')
                     ->label('ფასი')
+                    ->money('GEL')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('total_price')
+                    ->label('ჯამური ფასი')
                     ->money('GEL')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -118,7 +134,7 @@ class CompanyItemResource extends Resource
                 Tables\Filters\SelectFilter::make('company_id')
                     ->label(__('კომპანია'))
                     ->preload()
-                    ->relationship('company', 'title'),
+                    ->relationship('company', 'company'),
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label(__('კატეგორია'))
                     ->preload()
@@ -127,6 +143,28 @@ class CompanyItemResource extends Resource
                     ->label(__('საზომი ერთეული'))
                     ->preload()
                     ->relationship('measure', 'short_title'),
+                Tables\Filters\Filter::make('price')
+                    ->form([
+                        Forms\Components\TextInput::make('min_price')
+                            ->label('მინ. ფასი')
+                            ->numeric()
+                            ->debounce(),
+                        TextInput::make('max_price')
+                            ->label('მაქს. ფასი')
+                            ->numeric()
+                            ->debounce(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['min_price'], function (Builder $query, ?string $from) {
+                                $query->where('price', '>=', $from)
+                                    ->orWhere('total_price', '>=', $from);
+                            })
+                            ->when($data['max_price'], function (Builder $query, ?string $to) {
+                                $query->where('price', '<=', $to)
+                                    ->orWhere('total_price', '<=', $to);
+                            });
+                    }),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
                         DatePicker::make('from')
@@ -159,7 +197,7 @@ class CompanyItemResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CompanyRelationManager::class
         ];
     }
 

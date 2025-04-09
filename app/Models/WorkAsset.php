@@ -9,6 +9,7 @@ class WorkAsset extends Model
 {
     protected $fillable = [
         'street',
+        'grand_total',
         'is_completed',
     ];
 

@@ -1,29 +1,29 @@
 <?php
 
-namespace App\Filament\Resources\DamageResource\Widgets;
+namespace App\Filament\Resources\CompanyItemResource\Widgets;
 
-use App\Filament\Resources\DamageResource\Pages\ListDamages;
+use App\Filament\Resources\CompanyItemResource\Pages\ListCompanyItem;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class DamageTotalExpense extends StatsOverviewWidget
+class CompanyItemTotalExpense extends StatsOverviewWidget
 {
     use InteractsWithPageTable;
 
     protected function getTablePage(): string
     {
-        return ListDamages::class;
+        return ListCompanyItem::class;
     }
 
     protected function getStats(): array
     {
         return [
             Stat::make('ხარჯი', money(
-                $this->getPageTableQuery()
-                    ->sum('total_price') ?? 0
-            )),
+                $this->getPageTableQuery()->sum('total_price')
+            ))
         ];
     }
+
 }
 

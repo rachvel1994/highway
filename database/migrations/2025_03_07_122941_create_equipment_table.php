@@ -13,7 +13,8 @@ return new class extends Migration {
         Schema::create('equipment', function (Blueprint $table) {
             $table->id();
             $table->string('equipment')->unique()->index('equipment');
-            $table->string('equipment')->unique()->index('equipment');
+            $table->string('type')->default('main');
+            $table->decimal('price')->default(0);
             $table->timestamps();
         });
     }

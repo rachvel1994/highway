@@ -23,7 +23,8 @@ class PersonalTotalExpense extends StatsOverviewWidget
                 $this->getPageTableQuery()
                     ->selectRaw('SUM(CASE WHEN salary_type = 2 THEN salary * worked_days ELSE salary END) AS total_salary')
                     ->value('total_salary')
-            ))        ];
+            ))
+        ];
     }
 }
 

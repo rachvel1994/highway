@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\DamageResource\Widgets;
+namespace App\Filament\Resources\FactoryResource\Widgets;
 
-use App\Filament\Resources\DamageResource\Pages\ListDamages;
+use App\Filament\Resources\FactoryResource\Pages\ListFactories;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class DamageTotalExpense extends StatsOverviewWidget
+class FactoryTotalExpense extends StatsOverviewWidget
 {
     use InteractsWithPageTable;
 
     protected function getTablePage(): string
     {
-        return ListDamages::class;
+        return ListFactories::class;
     }
 
     protected function getStats(): array
@@ -21,7 +21,8 @@ class DamageTotalExpense extends StatsOverviewWidget
         return [
             Stat::make('ხარჯი', money(
                 $this->getPageTableQuery()
-                    ->sum('total_price') ?? 0
+                    ->selectRaw('SUM((detail_price * quantity) + craft_price + additional_expense) as total_expense')
+                    ->value('total_expense') ?? 0
             )),
         ];
     }

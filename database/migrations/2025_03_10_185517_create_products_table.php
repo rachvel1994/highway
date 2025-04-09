@@ -17,7 +17,8 @@ return new class extends Migration {
             $table->integer('quantity')->default(0);
             $table->foreignId('category_id')->nullable();
             $table->foreignId('measure_id')->nullable();
-            $table->float('price')->default(0.00);
+            $table->float('price')->default(0);
+            $table->decimal('total_price')->default(0);
             $table->text('comment')->nullable();
             $table->unique(['store_id', 'title']);
             $table->timestamps();

@@ -21,8 +21,7 @@ class ProductTotalExpense extends StatsOverviewWidget
         return [
             Stat::make('ხარჯი', money(
                 $this->getPageTableQuery()
-                    ->selectRaw('COALESCE(SUM(price * quantity), 0) as total_expense')
-                    ->value('total_expense')
+                    ->sum('total_price')
             ))
         ];
     }

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('measure_id')->nullable();
             $table->float('price')->default(0.00);
             $table->text('comment')->nullable();
+            $table->decimal('total_price')->default(0)->nullable();
             $table->unique(['company_id', 'title']);
             $table->timestamps();
         });

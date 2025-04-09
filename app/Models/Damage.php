@@ -16,6 +16,7 @@ class Damage extends Model
         'craft_price',
         'craftsman',
         'additional_expense',
+        'total_price',
         'comment',
     ];
 
@@ -23,7 +24,7 @@ class Damage extends Model
         'detail_price' => 'float',
         'craft_price' => 'float',
         'additional_expense' => 'float',
-        'total_expense' => 'float',
+        'total_price' => 'float',
     ];
 
     public function equipment(): BelongsTo

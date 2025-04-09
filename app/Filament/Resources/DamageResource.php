@@ -42,24 +42,69 @@ class DamageResource extends Resource
                     ->label('დაზიანება'),
                 Forms\Components\TextInput::make('detail_name')
                     ->label('დეტალი'),
-                Forms\Components\Grid::make(4)
+                Forms\Components\Grid::make(5)
                     ->schema([
                         Forms\Components\TextInput::make('quantity')
                             ->label('რაოდენობა')
-                            ->numeric(),
+                            ->numeric()
+                            ->reactive()
+                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                                $quantity = (float)$get('quantity') ?: 0;
+                                $detailPrice = (float)$get('detail_price') ?: 0;
+                                $craftPrice = (float)$get('craft_price') ?: 0;
+                                $additionalExpense = (float)$get('additional_expense') ?: 0;
+
+                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
+                            }),
+
                         Forms\Components\TextInput::make('detail_price')
-                            ->numeric()
                             ->label('დეტალის ფასი')
-                            ->postfix('₾'),
+                            ->numeric()
+                            ->postfix('₾')
+                            ->reactive()
+                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                                $quantity = (float)$get('quantity') ?: 0;
+                                $detailPrice = (float)$get('detail_price') ?: 0;
+                                $craftPrice = (float)$get('craft_price') ?: 0;
+                                $additionalExpense = (float)$get('additional_expense') ?: 0;
+
+                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
+                            }),
+
                         Forms\Components\TextInput::make('craft_price')
-                            ->numeric()
                             ->label('ხელობის ფასი')
-                            ->postfix('₾'),
-                        Forms\Components\TextInput::make('additional_expense')
                             ->numeric()
+                            ->reactive()
+                            ->postfix('₾')
+                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                                $quantity = (float)$get('quantity') ?: 0;
+                                $detailPrice = (float)$get('detail_price') ?: 0;
+                                $craftPrice = (float)$get('craft_price') ?: 0;
+                                $additionalExpense = (float)$get('additional_expense') ?: 0;
+
+                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
+                            }),
+
+                        Forms\Components\TextInput::make('additional_expense')
                             ->label('დამატებითი ხარჯი')
+                            ->numeric()
+                            ->reactive()
+                            ->postfix('₾')
+                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                                $quantity = (float)$get('quantity') ?: 0;
+                                $detailPrice = (float)$get('detail_price') ?: 0;
+                                $craftPrice = (float)$get('craft_price') ?: 0;
+                                $additionalExpense = (float)$get('additional_expense') ?: 0;
+
+                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
+                            }),
+
+                        Forms\Components\TextInput::make('total_price')
+                            ->label('ჯამური ფასი')
+                            ->numeric()
                             ->postfix('₾'),
                     ]),
+
                 Forms\Components\Textarea::make('comment')
                     ->rows(5)
                     ->columnSpanFull()

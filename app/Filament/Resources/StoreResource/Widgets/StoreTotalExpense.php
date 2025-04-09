@@ -22,11 +22,9 @@ class StoreTotalExpense extends StatsOverviewWidget
             Stat::make('ხარჯი', money(
                 $this->getPageTableQuery()
                     ->leftJoin('products', 'stores.id', '=', 'products.store_id')
-                    ->selectRaw('COALESCE(SUM(products.price * products.quantity), 0) as total_expense')
-                    ->value('total_expense')
+                    ->sum('total_price')
             ))
         ];
     }
-
 }
 
