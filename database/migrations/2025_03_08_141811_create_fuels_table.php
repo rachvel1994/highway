@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('fuels', function (Blueprint $table) {
             $table->id();
             $table->string('title')->index('title');
-            $table->float('price')->default(0.00);
+            $table->float('price')->default(0);
             $table->float('quantity')->default(0);
             $table->float('remain')->default(0);
+            $table->decimal('total_price', 10)->default(0);
             $table->timestamps();
         });
     }

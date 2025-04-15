@@ -46,61 +46,42 @@ class DamageResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('quantity')
                             ->label('რაოდენობა')
+                            ->default(0)
                             ->numeric()
                             ->reactive()
-                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
-                                $quantity = (float)$get('quantity') ?: 0;
-                                $detailPrice = (float)$get('detail_price') ?: 0;
-                                $craftPrice = (float)$get('craft_price') ?: 0;
-                                $additionalExpense = (float)$get('additional_expense') ?: 0;
-
-                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
-                            }),
+                            ->debounce(3)
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
 
                         Forms\Components\TextInput::make('detail_price')
                             ->label('დეტალის ფასი')
+                            ->default(0)
                             ->numeric()
+                            ->debounce(3)
                             ->postfix('₾')
                             ->reactive()
-                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
-                                $quantity = (float)$get('quantity') ?: 0;
-                                $detailPrice = (float)$get('detail_price') ?: 0;
-                                $craftPrice = (float)$get('craft_price') ?: 0;
-                                $additionalExpense = (float)$get('additional_expense') ?: 0;
-
-                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
-                            }),
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
 
                         Forms\Components\TextInput::make('craft_price')
                             ->label('ხელობის ფასი')
+                            ->default(0)
                             ->numeric()
+                            ->debounce(3)
                             ->reactive()
                             ->postfix('₾')
-                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
-                                $quantity = (float)$get('quantity') ?: 0;
-                                $detailPrice = (float)$get('detail_price') ?: 0;
-                                $craftPrice = (float)$get('craft_price') ?: 0;
-                                $additionalExpense = (float)$get('additional_expense') ?: 0;
-
-                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
-                            }),
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
 
                         Forms\Components\TextInput::make('additional_expense')
                             ->label('დამატებითი ხარჯი')
+                            ->default(0)
                             ->numeric()
+                            ->debounce(3)
                             ->reactive()
                             ->postfix('₾')
-                            ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
-                                $quantity = (float)$get('quantity') ?: 0;
-                                $detailPrice = (float)$get('detail_price') ?: 0;
-                                $craftPrice = (float)$get('craft_price') ?: 0;
-                                $additionalExpense = (float)$get('additional_expense') ?: 0;
-
-                                $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
-                            }),
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
 
                         Forms\Components\TextInput::make('total_price')
                             ->label('ჯამური ფასი')
+                            ->default(0)
                             ->numeric()
                             ->postfix('₾'),
                     ]),
@@ -214,5 +195,15 @@ class DamageResource extends Resource
             'create' => Pages\CreateDamage::route('/create'),
             'edit' => Pages\EditDamage::route('/{record}/edit'),
         ];
+    }
+
+    private static function calculateTotalPrice(Forms\Get $get, Forms\Set $set): void
+    {
+        $quantity = (float)$get('quantity') ?? 0;
+        $detailPrice = (float)$get('detail_price') ?? 0;
+        $craftPrice = (float)$get('craft_price') ?? 0;
+        $additionalExpense = (float)$get('additional_expense') ?? 0;
+
+        $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
     }
 }

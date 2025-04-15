@@ -21,4 +21,9 @@ class Equipment extends Model
     {
         return $this->hasMany(Damage::class, 'equipment_id', 'id');
     }
+
+    public function workAssetDetails(): HasMany
+    {
+        return $this->hasMany(WorkAssetDetail::class, 'equipment_id', 'id');
+    }
 }

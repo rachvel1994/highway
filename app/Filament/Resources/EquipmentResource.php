@@ -36,6 +36,7 @@ class EquipmentResource extends Resource
                 Forms\Components\TextInput::make('equipment')
                     ->label('ტექნიკა')
                     ->unique(ignoreRecord: true)
+                    ->columnSpanFull()
                     ->required(),
                 Forms\Components\Select::make('type')
                     ->label('ტიპი')
@@ -43,6 +44,11 @@ class EquipmentResource extends Resource
                         'main' => 'საკუთარი',
                         'rent' => 'ნაქირავები',
                     ])
+                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
+                        if ($get('type') == 'main') {
+                            $set('price', 0);
+                        }
+                    })
                     ->required()
                     ->reactive(),
                 Forms\Components\TextInput::make('price')
@@ -51,7 +57,7 @@ class EquipmentResource extends Resource
                     ->minValue(0)
                     ->postfix('₾')
                     ->numeric()
-                    ->visible(fn (Forms\Get $get) => $get('type') == 'rent'),
+                    ->disabled(fn(Forms\Get $get) => $get('type') == 'main'),
             ]);
     }
 

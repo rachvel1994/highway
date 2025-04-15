@@ -20,12 +20,11 @@ class FuelStats extends StatsOverviewWidget
     {
         return [
             Stat::make('ხარჯი', money($this->getPageTableQuery()
-                ->selectRaw('SUM((price * quantity)) as total_expense')
-                ->value('total_expense'))),
-            Stat::make('რაოდენობა', money($this->getPageTableQuery()
-                ->sum('quantity'))),
-            Stat::make('ნაშთი', money($this->getPageTableQuery()
-                ->sum('remain')))
+                ->sum('total_price') ?? 0)),
+            Stat::make('რაოდენობა', $this->getPageTableQuery()
+                ->sum('quantity')),
+            Stat::make('ნაშთი', $this->getPageTableQuery()
+                ->sum('remain'))
         ];
     }
 }

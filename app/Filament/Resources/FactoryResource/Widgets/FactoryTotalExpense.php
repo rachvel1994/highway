@@ -21,8 +21,7 @@ class FactoryTotalExpense extends StatsOverviewWidget
         return [
             Stat::make('ხარჯი', money(
                 $this->getPageTableQuery()
-                    ->selectRaw('SUM((detail_price * quantity) + craft_price + additional_expense) as total_expense')
-                    ->value('total_expense') ?? 0
+                    ->sum('total_price') ?? 0
             )),
         ];
     }

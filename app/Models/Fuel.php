@@ -10,11 +10,13 @@ class Fuel extends Model
         'title',
         'price',
         'quantity',
-        'remain'
+        'remain',
+        'total_price',
     ];
 
     protected $casts = [
         'price' => 'float',
+        'total_price' => 'float',
         'quantity' => 'float',
         'remain' => 'float',
     ];

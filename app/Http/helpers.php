@@ -1,13 +1,12 @@
 <?php
 
+use App\Models\Company;
 use App\Models\CompanyItem;
 use App\Models\Equipment;
 use App\Models\Fuel;
 use App\Models\Personal;
 use App\Models\Product;
-use App\Models\WorkAsset;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
+use App\Models\Store;
 use Illuminate\Support\Number;
 
 if (!function_exists('money')) {
@@ -78,6 +77,22 @@ if (!function_exists('getItemById')) {
     }
 }
 
+if (!function_exists('getCompanyById')) {
+    function getCompanyById(?int $id = null): ?Company
+    {
+        return Company::query()->where('id', $id)->first();
+    }
+}
+
+
+if (!function_exists('getStoreById')) {
+    function getStoreById(?int $id = null): ?Store
+    {
+        return Store::query()->where('id', $id)->first();
+    }
+}
+
+
 if (!function_exists('getFuelById')) {
     function getFuelById(?int $id = null): ?Fuel
     {
@@ -86,7 +101,7 @@ if (!function_exists('getFuelById')) {
 }
 
 if (!function_exists('getTotalPrice')) {
-    function getTotalPrice(?float $price = 0, ?int $quantity = 0): float
+    function getTotalPrice(mixed $price = 0, mixed $quantity = 0): float
     {
         $price = empty($price) ? 0 : $price;
         $quantity = empty($quantity) ? 0 : $quantity;

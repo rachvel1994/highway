@@ -80,4 +80,16 @@ class WorkAssetDetail extends Model
     {
         return $this->belongsTo(Product::class, 'store_product_id');
     }
+
+    protected static function booted(): void
+    {
+        static::saved(function (WorkAssetDetail $detail) {
+            $workAsset = $detail->workAsset()->with('details')->first();
+            if ($workAsset) {
+                $workAsset->recalculateTotal();
+                $workAsset->refresh();
+            }
+        });
+    }
+
 }

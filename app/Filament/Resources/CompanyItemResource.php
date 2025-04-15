@@ -49,28 +49,33 @@ class CompanyItemResource extends Resource
                         ->numeric()
                         ->default(0)
                         ->postfix('₾')
+                        ->debounce(3)
                         ->reactive()
-                        ->afterStateUpdated(fn(callable $set, callable $get) => $set('total_price', $get('price') * $get('quantity'))),
+                        ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotalPrice($set, $get)),
                     Forms\Components\TextInput::make('quantity')
                         ->label('რაოდენობა')
                         ->required()
                         ->numeric()
+                        ->debounce(3)
                         ->default(0)
                         ->reactive()
-                        ->afterStateUpdated(fn(callable $set, callable $get) => $set('total_price', $get('price') * $get('quantity'))),
+                        ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotalPrice($set, $get)),
                     Forms\Components\TextInput::make('total_price')
                         ->label('ჯამური ფასი')
                         ->required()
                         ->numeric()
+                        ->debounce(3)
                         ->default(0)
                         ->postfix('₾'),
                     Forms\Components\Select::make('category_id')
                         ->label('კატეგორია')
+                        ->required()
                         ->searchable()
                         ->preload()
                         ->relationship('category', 'title'),
                     Forms\Components\Select::make('measure_id')
                         ->label('საზომი ერთეული')
+                        ->required()
                         ->searchable()
                         ->preload()
                         ->relationship('measure', 'short_title'),
@@ -208,5 +213,10 @@ class CompanyItemResource extends Resource
             'create' => Pages\CreateCompanyItem::route('/create'),
             'edit' => Pages\EditCompanyItem::route('/{record}/edit'),
         ];
+    }
+
+    private static function calculateTotalPrice(Forms\Set $set, Forms\Get $get): void
+    {
+        $set('total_price', getTotalPrice($get('price'), $get('quantity')));
     }
 }

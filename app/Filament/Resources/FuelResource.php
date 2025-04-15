@@ -34,19 +34,33 @@ class FuelResource extends Resource
                     ->label('დასახელება')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('price')
-                    ->label('ფასი')
-                    ->numeric()
-                    ->default(0)
-                    ->postfix('₾'),
-                Forms\Components\TextInput::make('quantity')
-                    ->label('რაოდენობა')
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('remain')
-                    ->label('ნაშთი')
-                    ->numeric()
-                    ->default(0),
+                Forms\Components\Grid::make(4)
+                    ->schema([
+                        Forms\Components\TextInput::make('price')
+                            ->label('ფასი')
+                            ->numeric()
+                            ->default(0)
+                            ->postfix('₾')
+                            ->reactive()
+                            ->debounce(3)
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
+                        Forms\Components\TextInput::make('quantity')
+                            ->label('რაოდენობა')
+                            ->numeric()
+                            ->default(0)
+                            ->reactive()
+                            ->debounce(3)
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
+                        Forms\Components\TextInput::make('remain')
+                            ->label('ნაშთი')
+                            ->numeric()
+                            ->default(0),
+                        Forms\Components\TextInput::make('total_price')
+                            ->label('სრული ჯამი')
+                            ->numeric()
+                            ->reactive()
+                            ->default(0)
+                    ])
             ]);
     }
 
@@ -149,5 +163,10 @@ class FuelResource extends Resource
             'create' => Pages\CreateFuel::route('/create'),
             'edit' => Pages\EditFuel::route('/{record}/edit'),
         ];
+    }
+
+    private static function calculateTotalPrice(Forms\Get $get, Forms\Set $set): void
+    {
+        $set('total_price', getTotalPrice($get('price'), $get('quantity')));
     }
 }

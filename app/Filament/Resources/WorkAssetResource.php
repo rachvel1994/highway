@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Component;
 
 class WorkAssetResource extends Resource
 {
@@ -33,16 +34,23 @@ class WorkAssetResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('street')
-                    ->label('ქუჩა')
-                    ->unique(ignoreRecord: true)
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('grand_total')
-                    ->label('ობიექტის ჯამი')
-                    ->default(0)
-                    ->reactive()
-                    ->postfix('₾'),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\TextInput::make('street')
+                        ->label('ქუჩა')
+                        ->unique(ignoreRecord: true)
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('grand_total')
+                        ->label('ობიექტის ჯამი')
+                        ->default(0)
+                        ->disabled()
+                        ->postfix('₾'),
+                    Forms\Components\TextInput::make('damage_share_total')
+                        ->label('დაზიანების ჯამი')
+                        ->default(0)
+                        ->disabled()
+                        ->postfix('₾'),
+                ]),
                 Forms\Components\Toggle::make('is_completed')
                     ->default(0)
                     ->label('სამუშაო დასრულბულია')
@@ -70,9 +78,7 @@ class WorkAssetResource extends Resource
                                             ->label('მოხმარებული დრო')
                                             ->default(0)
                                             ->minValue(0)
-                                            ->maxValue(8)
-                                            ->numeric()
-                                            ->step('0.01'),
+                                            ->numeric(),
 
                                         Forms\Components\TextInput::make('completed_trip')
                                             ->label('რეისის რაოდენობა')
@@ -93,9 +99,8 @@ class WorkAssetResource extends Resource
                                             ->afterStateUpdated(function (callable $set, callable $get) {
                                                 $item = getFuelById($get('fuel_id'));
                                                 $price = $item->price ?? 0;
-                                                $quantity = $get('fuel_spend') ?? 0;
                                                 $set('fuel_price', $price);
-                                                $set('fuel_total_price', getTotalPrice($price, $quantity));
+                                                self::getFuelTotalPrice($set, $get);
                                             }),
 
                                         Forms\Components\TextInput::make('fuel_price')
@@ -104,12 +109,7 @@ class WorkAssetResource extends Resource
                                             ->minValue(0)
                                             ->numeric()
                                             ->reactive()
-                                            ->step('0.01')
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                $price = $get('fuel_price') ?? 0;
-                                                $quantity = $get('fuel_spend') ?? 0;
-                                                $set('fuel_total_price', getTotalPrice($price, $quantity));
-                                            }),
+                                            ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::getFuelTotalPrice($set, $get)),
 
                                         Forms\Components\TextInput::make('fuel_spend')
                                             ->label('მოხმარებული საწვავი')
@@ -117,12 +117,7 @@ class WorkAssetResource extends Resource
                                             ->numeric()
                                             ->reactive()
                                             ->minValue(0)
-                                            ->step('0.01')
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                $price = $get('fuel_price') ?? 0;
-                                                $quantity = $get('fuel_spend') ?? 0;
-                                                $set('fuel_total_price', getTotalPrice($price, $quantity));
-                                            }),
+                                            ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::getFuelTotalPrice($set, $get)),
 
                                         Forms\Components\TextInput::make('fuel_total_price')
                                             ->label('ჯამური ფასი')
@@ -157,9 +152,8 @@ class WorkAssetResource extends Resource
                                             ->afterStateUpdated(function (callable $set, callable $get) {
                                                 $item = getItemById($get('item_id'));
                                                 $price = $item->price ?? 0;
-                                                $quantity = $get('item_quantity') ?? 0;
                                                 $set('item_price', $price);
-                                                $set('item_total_price', getTotalPrice($price, $quantity));
+                                                self::getItemTotalPrice($set, $get);
                                             })
                                             ->disabled(fn(Forms\Get $get) => !$get('company_id')),
 
@@ -169,12 +163,7 @@ class WorkAssetResource extends Resource
                                             ->minValue(0)
                                             ->numeric()
                                             ->reactive()
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                $price = $get('item_price') ?? 0;
-                                                $quantity = $get('item_quantity') ?? 0;
-                                                $set('item_total_price', getTotalPrice($price, $quantity));
-                                            })
-                                            ->step('0.01'),
+                                            ->afterStateUpdated(fn(callable $set, callable $get) => self::getItemTotalPrice($set, $get)),
 
                                         Forms\Components\TextInput::make('item_quantity')
                                             ->label('მასალის რაოდენობა')
@@ -182,12 +171,7 @@ class WorkAssetResource extends Resource
                                             ->minValue(0)
                                             ->numeric()
                                             ->reactive()
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                $price = $get('item_price') ?? 0;
-                                                $quantity = $get('item_quantity') ?? 0;
-                                                $set('item_total_price', getTotalPrice($price, $quantity));
-                                            })
-                                            ->step('0.01'),
+                                            ->afterStateUpdated(fn(callable $set, callable $get) => self::getItemTotalPrice($set, $get)),
 
                                         Forms\Components\TextInput::make('item_total_price')
                                             ->label('ჯამური ფასი')
@@ -222,9 +206,8 @@ class WorkAssetResource extends Resource
                                             ->afterStateUpdated(function (callable $set, callable $get) {
                                                 $product = getProductById($get('store_product_id'));
                                                 $price = $product->price ?? 0;
-                                                $quantity = $get('product_quantity') ?? 0;
                                                 $set('product_price', $price);
-                                                $set('product_price_total', getTotalPrice($price, $quantity));
+                                                self::getProductTotalPrice($set, $get);
                                             })
                                             ->disabled(fn(Forms\Get $get) => !$get('store_id')),
 
@@ -235,12 +218,7 @@ class WorkAssetResource extends Resource
                                             ->postfix('₾')
                                             ->numeric()
                                             ->reactive()
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                $price = $get('product_price') ?? 0;
-                                                $quantity = $get('product_quantity') ?? 0;
-                                                $set('product_price_total', getTotalPrice($price, $quantity));
-                                            })
-                                            ->step('0.01'),
+                                            ->afterStateUpdated(fn(callable $set, callable $get) => self::getProductTotalPrice($set, $get)),
 
                                         Forms\Components\TextInput::make('product_quantity')
                                             ->label('პროდუქციის რაოდენობა')
@@ -248,12 +226,7 @@ class WorkAssetResource extends Resource
                                             ->minValue(0)
                                             ->numeric()
                                             ->reactive()
-                                            ->afterStateUpdated(function (callable $set, callable $get) {
-                                                $price = $get('product_price') ?? 0;
-                                                $quantity = $get('product_quantity') ?? 0;
-                                                $set('product_price_total', getTotalPrice($price, $quantity));
-                                            })
-                                            ->step('0.01'),
+                                            ->afterStateUpdated(fn(callable $set, callable $get) => self::getProductTotalPrice($set, $get)),
 
                                         Forms\Components\TextInput::make('product_price_total')
                                             ->label('ჯამური ფასი')
@@ -279,7 +252,6 @@ class WorkAssetResource extends Resource
                                             ->default(0)
                                             ->minValue(0)
                                             ->numeric()
-                                            ->step('0.01')
                                             ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get)),
                                         Forms\Components\Select::make('person_salary_type')
@@ -318,16 +290,15 @@ class WorkAssetResource extends Resource
                                             ->default(0)
                                             ->minValue(0)
                                             ->numeric()
-                                            ->reactive()
-                                            ->step('0.01'),
+                                            ->reactive(),
                                     ]),
                                 ]),
                             ])
                     ])
-                    ->afterStateHydrated(fn(Forms\Set $set, Forms\Get $get) => self::grandTotal($set, $get))
                     ->orderColumn('created_at')
                     ->collapsed()
                     ->addActionLabel('ობიექტის დეტალების დამატება')
+                    ->itemLabel(fn(array $state): ?string => self::setRepeaterLabel($state) ?? null)
                     ->columnSpanFull(),
             ]);
     }
@@ -465,7 +436,9 @@ class WorkAssetResource extends Resource
                     })
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make('edit')->after(function (Component $livewire) {
+                    $livewire->dispatch('refreshWorkAssets');
+                }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -490,35 +463,47 @@ class WorkAssetResource extends Resource
         ];
     }
 
-    private static function grandTotal(Forms\Set $set, Forms\Get $get): void
+    private static function setRepeaterLabel(array $data): string
     {
-        $details = $get('workAssetEquipments') ?? [];
-        $total = 0;
+        $labels = [];
 
-        foreach ($details as $row) {
-            $total += self::calculateGrandTotal($row);
+        if (!empty($data['equipment_id'])) {
+            $labels[] = getEquipmentById($data['equipment_id'])->equipment ?? null;
         }
 
-        $set('grand_total', $total);
+        if (!empty($data['fuel_id'])) {
+            $labels[] = getFuelById($data['fuel_id'])->title ?? null;
+        }
+
+        if (!empty($data['company_id'])) {
+            $labels[] = getCompanyById($data['company_id'])->company ?? null;
+        }
+
+        if (!empty($data['store_id'])) {
+            $labels[] = getStoreById($data['store_id'])->store ?? null;
+        }
+
+        if (!empty($data['personal_id'])) {
+            $labels[] = getPersonById($data['personal_id'])->full_name ?? null;
+        }
+
+        // Filter nulls and duplicates, return comma-separated string
+        return implode(', ', array_filter(array_unique($labels)));
     }
 
-    private static function calculateGrandTotal(array $row): float
+
+    private static function getProductTotalPrice(Forms\Set $set, Forms\Get $get): void
     {
-        $workedTime = is_numeric($row['time_spend']) ? (float)$row['time_spend'] : 0;
+        $set('product_price_total', getTotalPrice($get('product_price'), $get('product_quantity')));
+    }
 
-        $equipment = getEquipmentById($row['equipment_id']);
+    private static function getItemTotalPrice(Forms\Set $set, Forms\Get $get): void
+    {
+        $set('item_total_price', getTotalPrice($get('item_price'), $get('item_quantity')));
+    }
 
-        $total = $row['fuel_total_price'] + $row['item_total_price'] + $row['product_price_total'] + $row['person_salary_total'];
-
-        if ($equipment) {
-            if ($equipment->type === 'rent') {
-                $total += ($equipment->price / 8) * min($workedTime, 8);
-            } else {
-                $damageSum = $equipment->damages()?->sum('total_price') ?? 0;
-                $total += ($damageSum / 8) * min($workedTime, 8);
-            }
-        }
-
-        return $total;
+    private static function getFuelTotalPrice(Forms\Set $set, Forms\Get $get): void
+    {
+        $set('fuel_total_price', getTotalPrice($get('fuel_price'), $get('fuel_spend')));
     }
 }

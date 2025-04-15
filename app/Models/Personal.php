@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Personal extends Model
 {
@@ -17,4 +18,9 @@ class Personal extends Model
     protected $casts = [
         'salary' => 'float',
     ];
+
+    public function workAssetDetails(): HasMany
+    {
+        return $this->hasMany(WorkAssetDetail::class, 'person_id');
+    }
 }

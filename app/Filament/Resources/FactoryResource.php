@@ -27,31 +27,59 @@ class FactoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')
+                Forms\Components\TextInput::make('factory')
                     ->label('ქარხანა')
                     ->required(),
-                Forms\Components\TextInput::make('craftsman')
-                    ->label('მოხელე'),
-                Forms\Components\TextInput::make('damage')
-                    ->label('დაზიანება'),
-                Forms\Components\TextInput::make('detail_name')
-                    ->label('დეტალი'),
-                Forms\Components\Grid::make(4)
+                Forms\Components\Grid::make(3)
+                    ->schema([
+                        Forms\Components\TextInput::make('craftsman')
+                            ->label('მოხელე'),
+                        Forms\Components\TextInput::make('damage')
+                            ->label('დაზიანება'),
+                        Forms\Components\TextInput::make('detail_name')
+                            ->label('დეტალი'),
+                    ]),
+                Forms\Components\Grid::make(5)
                     ->schema([
                         Forms\Components\TextInput::make('quantity')
                             ->label('რაოდენობა')
-                            ->numeric(),
+                            ->default(0)
+                            ->numeric()
+                            ->reactive()
+                            ->debounce(3)
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
+
                         Forms\Components\TextInput::make('detail_price')
-                            ->numeric()
                             ->label('დეტალის ფასი')
-                            ->postfix('₾'),
+                            ->default(0)
+                            ->numeric()
+                            ->debounce(3)
+                            ->postfix('₾')
+                            ->reactive()
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
+
                         Forms\Components\TextInput::make('craft_price')
-                            ->numeric()
                             ->label('ხელობის ფასი')
-                            ->postfix('₾'),
-                        Forms\Components\TextInput::make('additional_expense')
+                            ->default(0)
                             ->numeric()
+                            ->reactive()
+                            ->debounce(3)
+                            ->postfix('₾')
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
+
+                        Forms\Components\TextInput::make('additional_expense')
                             ->label('დამატებითი ხარჯი')
+                            ->default(0)
+                            ->numeric()
+                            ->reactive()
+                            ->postfix('₾')
+                            ->debounce(3)
+                            ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
+
+                        Forms\Components\TextInput::make('total_price')
+                            ->label('ჯამური ფასი')
+                            ->default(0)
+                            ->numeric()
                             ->postfix('₾'),
                     ]),
                 Forms\Components\Textarea::make('comment')
@@ -65,7 +93,7 @@ class FactoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
+                Tables\Columns\TextColumn::make('factory')
                     ->label('ქარხანა')
                     ->searchable()
                     ->sortable()
@@ -163,5 +191,15 @@ class FactoryResource extends Resource
             'create' => Pages\CreateFactory::route('/create'),
             'edit' => Pages\EditFactory::route('/{record}/edit'),
         ];
+    }
+
+    private static function calculateTotalPrice(Forms\Get $get, Forms\Set $set): void
+    {
+        $quantity = (float)$get('quantity') ?: 0;
+        $detailPrice = (float)$get('detail_price') ?: 0;
+        $craftPrice = (float)$get('craft_price') ?: 0;
+        $additionalExpense = (float)$get('additional_expense') ?: 0;
+
+        $set('total_price', $quantity * $detailPrice + $craftPrice + $additionalExpense);
     }
 }

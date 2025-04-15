@@ -49,14 +49,14 @@ class ProductResource extends Resource
                         ->default(0)
                         ->postfix('₾')
                         ->reactive()
-                        ->afterStateUpdated(fn(callable $set, callable $get) => $set('total_price', $get('price') * $get('quantity'))),
+                        ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
                     Forms\Components\TextInput::make('quantity')
                         ->label('რაოდენობა')
                         ->required()
                         ->numeric()
                         ->default(0)
                         ->reactive()
-                        ->afterStateUpdated(fn(callable $set, callable $get) => $set('total_price', $get('price') * $get('quantity'))),
+                        ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
                     Forms\Components\TextInput::make('total_price')
                         ->label('ჯამური ფასი')
                         ->required()
@@ -65,12 +65,14 @@ class ProductResource extends Resource
                         ->postfix('₾'),
                     Forms\Components\Select::make('category_id')
                         ->label('კატეგორია')
+                        ->required()
                         ->searchable()
                         ->preload()
                         ->relationship('category', 'title'),
                     Forms\Components\Select::make('measure_id')
                         ->label('საზომი ერთეული')
                         ->searchable()
+                        ->required()
                         ->preload()
                         ->relationship('measure', 'short_title'),
                 ]),
@@ -207,5 +209,10 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    private static function calculateTotalPrice(Forms\Get $get, Forms\Set $set): void
+    {
+        $set('total_price', getTotalPrice($get('price'), $get('quantity')));
     }
 }
