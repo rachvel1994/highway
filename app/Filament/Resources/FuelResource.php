@@ -81,6 +81,12 @@ class FuelResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('total_price')
+                    ->label('ჯამური ფასი')
+                    ->money('GEL')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label('რაოდენობა')
                     ->numeric()
@@ -118,6 +124,26 @@ class FuelResource extends Resource
                             })
                             ->when($data['to'], function (Builder $query, ?string $to) {
                                 $query->where('price', '<=', $to);
+                            });
+                    }),
+                Tables\Filters\Filter::make('total_price')
+                    ->form([
+                        TextInput::make('total_from')
+                            ->label('ჯამური ფასიდან')
+                            ->numeric()
+                            ->debounce(),
+                        TextInput::make('total_to')
+                            ->label('ჯამური ფასამდე')
+                            ->numeric()
+                            ->debounce(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['total_from'], function (Builder $query, ?string $totalFrom) {
+                                $query->where('total_price', '>=', $totalFrom);
+                            })
+                            ->when($data['total_to'], function (Builder $query, ?string $totalTo) {
+                                $query->where('total_price', '<=', $totalTo);
                             });
                     }),
                 Tables\Filters\Filter::make('created_at')
