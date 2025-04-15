@@ -11,6 +11,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class FactoryResource extends Resource
 {
@@ -169,10 +172,15 @@ class FactoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                ExportAction::make()->label('ექსელის ექსპორტი')->modelLabel('dd')->exports([
+                    ExcelExport::make('table')->fromTable()->label('მთავარი გვერდის ექსპორტი'),
+                    ExcelExport::make('form')->fromForm()->label('შიდა გვერდის ექსპორტი'),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
                 ]),
             ]);
     }
