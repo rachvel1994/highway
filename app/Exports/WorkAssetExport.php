@@ -44,7 +44,7 @@ class WorkAssetExport implements FromCollection, WithHeadings, ShouldAutoSize
                     'დაზიანების ჯამი' => null,
                     'სამუშაო დასრულებულია' => null,
                     'ინფორმაცია' => 'ობიექტის დეტალები',
-                    'სამუშაო ტიპი' => $detail->jobType->title,
+                    'სამუშაო ტიპი' => $detail->jobType->title ?? 'N/A',
                     'ტექნიკა' => $detail->equipment->equipment_with_type ?? 'N/A',
                     'მოხმარებული დრო ' => $detail->time_spend,
                     'რეისის რაოდენობა' => $detail->completed_trip ?? 0,
