@@ -48,7 +48,7 @@ class WorkAssetExport implements FromCollection, WithHeadings, ShouldAutoSize
                     'ტექნიკა' => $detail->equipment->equipment_with_type ?? 'N/A',
                     'მოხმარებული დრო ' => $detail->time_spend,
                     'რეისის რაოდენობა' => $detail->completed_trip ?? 0,
-                    'საწვავი' => $detail->fuel->title,
+                    'საწვავი' => $detail->fuel->title  ?? 'N/A',
                     'საწვავის ფასი' => money($detail->fuel_price),
                     'მოხმარებული საწვავი' => $detail->fuel_spend,
                     'საწვავის ჯამური ფასი' => money($detail->fuel_total_price),
