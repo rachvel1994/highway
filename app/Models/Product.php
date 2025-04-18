@@ -37,4 +37,9 @@ class Product extends Model
     {
         return $this->belongsTo(Measure::class, 'measure_id', 'id');
     }
+
+    public function getTitleWithStoreAttribute(): string
+    {
+        return "{$this->title} ({$this->store?->store})";
+    }
 }

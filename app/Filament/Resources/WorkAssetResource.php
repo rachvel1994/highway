@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\WorkAssetExport;
 use App\Filament\Resources\WorkAssetResource\Pages;
 use App\Models\WorkAsset;
 use Exception;
@@ -15,10 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\Component;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WorkAssetResource extends Resource
 {
@@ -29,7 +27,6 @@ class WorkAssetResource extends Resource
 
     protected static ?string $modelLabel = 'ობიექტი';
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
-
     protected static ?string $navigationGroup = 'ობიექტი';
     protected static ?int $navigationSort = 1;
 
@@ -64,6 +61,7 @@ class WorkAssetResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('job_type_id')
                             ->label('სამუშაო ტიპი')
+                            ->required()
                             ->searchable()
                             ->preload()
                             ->relationship('jobType', 'title'),
@@ -75,7 +73,8 @@ class WorkAssetResource extends Resource
                                             ->label('ტექნიკა')
                                             ->searchable()
                                             ->preload()
-                                            ->relationship('equipment', 'equipment'),
+                                            ->relationship('equipment', 'id')
+                                            ->getOptionLabelFromRecordUsing(fn($record) => $record->equipment_with_type),
 
                                         Forms\Components\TextInput::make('time_spend')
                                             ->label('მოხმარებული დრო')
@@ -301,7 +300,7 @@ class WorkAssetResource extends Resource
                     ->orderColumn('created_at')
                     ->collapsed()
                     ->addActionLabel('ობიექტის დეტალების დამატება')
-                    ->itemLabel(fn(array $state): ?string => self::setRepeaterLabel($state) ?? null)
+                    ->itemLabel(fn(array $state, Forms\Get $get): ?string => self::setRepeaterLabel($state, $get) ?? null)
                     ->columnSpanFull(),
             ]);
     }
@@ -440,18 +439,38 @@ class WorkAssetResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->modelLabel('dd')->exports([
-                    ExcelExport::make('table')->fromTable()->label('მთავარი გვერდის ექსპორტი'),
-                    ExcelExport::make('form')->fromForm()->label('შიდა გვერდის ექსპორტი'),
-                ])
+                Tables\Actions\Action::make('export_details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('ექსელის ექსპორტი')
+                    ->action(function ($record) {
+                        $record->load('details');
+
+                        $fileName = 'ობიექტი_' . $record->street . '.xlsx';
+                        return Excel::download(
+                            new WorkAssetExport([$record]), $fileName
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
+                    Tables\Actions\BulkAction::make('export_bulk')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->label('ექსპორტი ექსელში')
+                        ->action(function ($records) {
+                            foreach ($records as $record) {
+                                $record->load('details');
+                            }
+
+                            $fileName = 'ობიექტები_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            return Excel::download(
+                                new WorkAssetExport($records), $fileName
+                            );
+                        }),
                 ]),
             ]);
     }
+
 
     public static function getRelations(): array
     {
@@ -469,32 +488,85 @@ class WorkAssetResource extends Resource
         ];
     }
 
-    private static function setRepeaterLabel(array $data): string
+    private static function setRepeaterLabel(array $data, Forms\Get $get): string
     {
         $labels = [];
+        $total = 0;
+        $isCompleted = (bool)($get('is_completed') ?? false);
 
         if (!empty($data['equipment_id'])) {
-            $labels[] = getEquipmentById($data['equipment_id'])->equipment ?? null;
+            $equipment = getEquipmentById($data['equipment_id']);
+            $labels[] = $equipment->equipment ?? null;
+
+            if ($equipment) {
+                if ($equipment->type === 'rent') {
+                    if (!$isCompleted) {
+                        $total += ($equipment->price / 8) * min($data['time_spend'], 8);
+                    } else {
+                        $total += (float)$get('total');
+                    }
+                } else {
+                    $totalDamage = (float)optional($equipment->damages())->sum('total_price');
+                    $totalTimeUsed = (float)optional($equipment->workAssetDetails())->sum('time_spend');
+                    $localDamageCount = optional($equipment->damages())->count();
+
+                    if (!$isCompleted && $totalTimeUsed > 0 && !empty($data['time_spend'])) {
+                        $shareRatio = $data['time_spend'] / $totalTimeUsed;
+                        $damageShare = $totalDamage * $shareRatio;
+                        $total += $damageShare;
+                    } elseif ($isCompleted) {
+                        $damageShare = (float)$get('damage_share_total');
+                        $total += $damageShare;
+                    }
+
+                    if ($localDamageCount > 0) {
+                        $labels[] = "დაზიანება: {$localDamageCount}";
+                    }
+                }
+            }
         }
+
 
         if (!empty($data['fuel_id'])) {
             $labels[] = getFuelById($data['fuel_id'])->title ?? null;
         }
 
-        if (!empty($data['company_id'])) {
-            $labels[] = getCompanyById($data['company_id'])->company ?? null;
+        if (!empty($data['company_id']) && !empty($data['item_id'])) {
+            $item = getItemById($data['item_id']);
+            if ($item) {
+                $labels[] = $item->title;
+            }
         }
 
-        if (!empty($data['store_id'])) {
-            $labels[] = getStoreById($data['store_id'])->store ?? null;
+        if (!empty($data['store_id']) && !empty($data['store_product_id'])) {
+            $product = getProductById($data['store_product_id']);
+            if ($product) {
+                $labels[] = $product->title;
+            }
         }
 
         if (!empty($data['personal_id'])) {
-            $labels[] = getPersonById($data['personal_id'])->full_name ?? null;
+            $person = getPersonById($data['personal_id']);
+            if ($person) {
+                $labels[] = $person->full_name;
+            }
         }
 
-        // Filter nulls and duplicates, return comma-separated string
-        return implode(', ', array_filter(array_unique($labels)));
+        // Sum all the totals
+        $totals = [
+            $total,
+            $data['fuel_total_price'] ?? 0,
+            $data['item_total_price'] ?? 0,
+            $data['product_price_total'] ?? 0,
+            $data['person_salary_total'] ?? 0,
+        ];
+
+        $sum = array_sum(array_map('floatval', $totals));
+        $sumFormatted = number_format($sum, 2);
+
+        $labelText = implode(' | ', array_filter($labels));
+
+        return trim($labelText . ($sum > 0 ? " • ჯამი: {$sumFormatted} ₾" : ''));
     }
 
 

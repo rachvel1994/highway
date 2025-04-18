@@ -38,14 +38,22 @@ if (!function_exists('recalculateSalary')) {
 if (!function_exists('getItemsByCompanyId')) {
     function getItemsByCompanyId(int $id): array
     {
-        return CompanyItem::query()->where('company_id', $id)->pluck('title', 'id')->toArray() ?? [];
+        return CompanyItem::with('company')
+        ->where('company_id', $id)
+            ->get()
+            ->mapWithKeys(fn ($item) => [$item->id => $item->title_with_company])
+            ->toArray() ?? [];
     }
 }
 
 if (!function_exists('getProductsByStoreId')) {
     function getProductsByStoreId(int $id): array
     {
-        return Product::query()->where('store_id', $id)->pluck('title', 'id')->toArray() ?? [];
+        return Product::with('store')
+            ->where('store_id', $id)
+            ->get()
+            ->mapWithKeys(fn ($product) => [$product->id => $product->title_with_store])
+            ->toArray() ?? [];
     }
 }
 

@@ -38,4 +38,9 @@ class CompanyItem extends Model
     {
         return $this->belongsTo(Measure::class, 'measure_id', 'id');
     }
+
+    public function getTitleWithCompanyAttribute(): string
+    {
+        return "{$this->title} ({$this->company?->company})";
+    }
 }
