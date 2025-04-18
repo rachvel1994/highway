@@ -61,6 +61,7 @@ class WorkAssetResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('job_type_id')
                             ->label('სამუშაო ტიპი')
+                            ->required()
                             ->searchable()
                             ->preload()
                             ->relationship('jobType', 'title'),
