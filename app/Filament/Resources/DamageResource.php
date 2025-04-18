@@ -100,7 +100,7 @@ class DamageResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('equipment_id')
+                Tables\Columns\TextColumn::make('equipment.equipment')
                     ->label('ტექნიკა')
                     ->searchable()
                     ->sortable()
