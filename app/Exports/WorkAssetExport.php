@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 class WorkAssetExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
-    private $data;
+    private array|Collection $data;
 
     // Constructor to pass in the data for export
     public function __construct($data)

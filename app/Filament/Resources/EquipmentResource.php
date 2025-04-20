@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\EquipmentExport;
 use App\Filament\Resources\EquipmentResource\Pages;
 use App\Filament\Resources\EquipmentResource\RelationManagers\DamagesRelationManager;
 use App\Models\Equipment;
@@ -14,9 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EquipmentResource extends Resource
 {
@@ -146,15 +145,34 @@ class EquipmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->modelLabel('dd')->exports([
-                    ExcelExport::make('table')->fromTable()->label('მთავარი გვერდის ექსპორტი'),
-                    ExcelExport::make('form')->fromForm()->label('შიდა გვერდის ექსპორტი'),
-                ])
+                Tables\Actions\Action::make('export_details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('ექსელის ექსპორტი')
+                    ->action(function ($record) {
+                        $record->load('damages');
+
+                        $fileName = 'ტექნიკა_' . $record->street . '.xlsx';
+                        return Excel::download(
+                            new EquipmentExport([$record]), $fileName
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
+                    Tables\Actions\BulkAction::make('export_bulk')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->label('ექსპორტი ექსელში')
+                        ->action(function ($records) {
+                            foreach ($records as $record) {
+                                $record->load('damages');
+                            }
+
+                            $fileName = 'ტექნიკები_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            return Excel::download(
+                                new EquipmentExport($records), $fileName
+                            );
+                        }),
                 ]),
             ]);
     }

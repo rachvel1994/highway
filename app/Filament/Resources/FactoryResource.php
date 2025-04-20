@@ -172,9 +172,8 @@ class FactoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->modelLabel('dd')->exports([
-                    ExcelExport::make('table')->fromTable()->label('მთავარი გვერდის ექსპორტი'),
-                    ExcelExport::make('form')->fromForm()->label('შიდა გვერდის ექსპორტი'),
+                ExportAction::make()->label('ექსელის ექსპორტი')->exports([
+                    ExcelExport::make('form')->fromForm(),
                 ])
             ])
             ->bulkActions([
