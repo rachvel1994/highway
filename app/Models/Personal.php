@@ -9,18 +9,10 @@ class Personal extends Model
 {
     protected $fillable = [
         'full_name',
-        'salary',
-        'salary_type',
-        'worked_days',
-        'comment'
-    ];
-
-    protected $casts = [
-        'salary' => 'float',
     ];
 
     public function workAssetDetails(): HasMany
     {
-        return $this->hasMany(WorkAssetDetail::class, 'person_id');
+        return $this->hasMany(WorkAssetDetail::class, 'personal_id');
     }
 }

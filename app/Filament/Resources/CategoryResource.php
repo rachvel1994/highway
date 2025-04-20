@@ -84,7 +84,7 @@ class CategoryResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('ექსელის ექსპორტი')
                     ->action(function ($record) {
-                        $fileName = 'კატეგორია_' . $record->street . '.xlsx';
+                        $fileName = 'კატეგორია_' . $record->title . '.xlsx';
                         return Excel::download(
                             new CategoryExport([$record]), $fileName
                         );
@@ -97,7 +97,7 @@ class CategoryResource extends Resource
                         ->icon('heroicon-o-arrow-down-tray')
                         ->label('ექსპორტი ექსელში')
                         ->action(function ($records) {
-                            $fileName = 'კატეგორია_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            $fileName = 'კატეგორიები_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
                             return Excel::download(
                                 new CategoryExport($records), $fileName
                             );

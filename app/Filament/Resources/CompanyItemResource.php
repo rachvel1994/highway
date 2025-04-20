@@ -197,7 +197,7 @@ class CompanyItemResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('ექსელის ექსპორტი')
                     ->action(function ($record) {
-                        $fileName = 'ნივთი_' . $record->street . '.xlsx';
+                        $fileName = 'ნივთი_' . $record->company->company . '.xlsx';
                         return Excel::download(
                             new CompanyItemExport([$record]), $fileName
                         );

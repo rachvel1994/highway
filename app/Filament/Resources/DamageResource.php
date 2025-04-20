@@ -179,7 +179,7 @@ class DamageResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->label('ექსელის ექსპორტი')
                     ->action(function ($record) {
-                        $fileName = 'დაზიანება_' . $record->street . '.xlsx';
+                        $fileName = 'დაზიანება_' . $record->equipment->equipment . '.xlsx';
                         return Excel::download(
                             new DamageExport([$record]), $fileName
                         );

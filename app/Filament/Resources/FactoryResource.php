@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\FactoryExport;
 use App\Filament\Resources\FactoryResource\Pages;
 use App\Models\Factory;
 use Filament\Forms;
@@ -11,9 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FactoryResource extends Resource
 {
@@ -172,14 +171,28 @@ class FactoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->exports([
-                    ExcelExport::make('form')->fromForm(),
-                ])
+                Tables\Actions\Action::make('export_details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('ექსელის ექსპორტი')
+                    ->action(function ($record) {
+                        $fileName = 'ქარხანა_' . $record->factory . '.xlsx';
+                        return Excel::download(
+                            new FactoryExport([$record]), $fileName
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
+                    Tables\Actions\BulkAction::make('export_bulk')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->label('ექსპორტი ექსელში')
+                        ->action(function ($records) {
+                            $fileName = 'ქარხანები_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            return Excel::download(
+                                new FactoryExport($records), $fileName
+                            );
+                        }),
                 ]),
             ]);
     }

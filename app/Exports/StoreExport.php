@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Illuminate\Support\Collection;
 
-class CompanyExport implements FromCollection, WithHeadings, ShouldAutoSize
+class StoreExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
     private array|Collection $data;
 
@@ -24,25 +24,25 @@ class CompanyExport implements FromCollection, WithHeadings, ShouldAutoSize
      */
     public function collection(): Collection
     {
-        return collect($this->data)->flatMap(function ($company) {
+        return collect($this->data)->flatMap(function ($store) {
             $rows = [];
 
             $rows[] = [
-                'კომპანია' => $company->company,
-                'ინფორმაცია' => 'კომპანია',
+                'მაღაზია' => $store->store,
+                'ინფორმაცია' => 'მაღაზია',
             ];
 
-            foreach ($company->company_items as $item) {
+            foreach ($store->products as $product) {
                 $rows[] = [
-                    'კომპანია' => null,
-                    'ინფორმაცია' => 'ნივთი',
-                    'სახელი' => $item->title,
-                    'ფასი' => money($item->price),
-                    'რაოდენობა' => $item->quantity,
-                    'ჯამური ფასი' => money($item->total_price),
-                    'კატეგორია' => $item->category->title,
-                    'საზომი ერთეული' => $item->measure->title,
-                    'კომენტარი' => $item->comment,
+                    'მაღაზია' => null,
+                    'ინფორმაცია' => 'პროდუქტი',
+                    'სახელი' => $product->title,
+                    'ფასი' => money($product->price),
+                    'რაოდენობა' => $product->quantity,
+                    'ჯამური ფასი' => money($product->total_price),
+                    'კატეგორია' => $product->category->title,
+                    'საზომი ერთეული' => $product->measure->title,
+                    'კომენტარი' => $product->comment,
                 ];
             }
 
@@ -58,7 +58,7 @@ class CompanyExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function headings(): array
     {
         return [
-            'კომპანია',
+            'მაღაზია',
             'ინფორმაცია',
             'სახელი',
             'ფასი',

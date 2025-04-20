@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\MeasureExport;
 use App\Filament\Resources\MeasureResource\Pages;
 use App\Models\Measure;
 use Filament\Forms;
@@ -9,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Facades\Excel;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
@@ -71,14 +73,28 @@ class MeasureResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->exports([
-                    ExcelExport::make('form')->fromForm(),
-                ])
+                Tables\Actions\Action::make('export_details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('ექსელის ექსპორტი')
+                    ->action(function ($record) {
+                        $fileName = 'საზომი_ერთეული_' . $record->title . '.xlsx';
+                        return Excel::download(
+                            new MeasureExport([$record]), $fileName
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
+                    Tables\Actions\BulkAction::make('export_bulk')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->label('ექსპორტი ექსელში')
+                        ->action(function ($records) {
+                            $fileName = 'საზომი_ერთეულები_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            return Excel::download(
+                                new MeasureExport($records), $fileName
+                            );
+                        }),
                 ]),
             ]);
     }

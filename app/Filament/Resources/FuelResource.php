@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\FuelExport;
 use App\Filament\Resources\FuelResource\Pages;
 use App\Models\Fuel;
 use Exception;
@@ -13,9 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FuelResource extends Resource
 {
@@ -59,7 +58,7 @@ class FuelResource extends Resource
                             ->numeric()
                             ->default(0),
                         Forms\Components\TextInput::make('total_price')
-                            ->label('სრული ჯამი')
+                            ->label('ჯამური ჯამი')
                             ->numeric()
                             ->reactive()
                             ->default(0)
@@ -170,14 +169,28 @@ class FuelResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->exports([
-                    ExcelExport::make('form')->fromForm(),
-                ])
+                Tables\Actions\Action::make('export_details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('ექსელის ექსპორტი')
+                    ->action(function ($record) {
+                        $fileName = 'საწვავი_' . $record->title . '.xlsx';
+                        return Excel::download(
+                            new FuelExport([$record]), $fileName
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
+                    Tables\Actions\BulkAction::make('export_bulk')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->label('ექსპორტი ექსელში')
+                        ->action(function ($records) {
+                            $fileName = 'საწვავები_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            return Excel::download(
+                                new FuelExport($records), $fileName
+                            );
+                        }),
                 ]),
             ]);
     }

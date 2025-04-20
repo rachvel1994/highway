@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers\StoreRelationManager;
 use App\Models\Product;
+use App\ProductExport;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -14,9 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductResource extends Resource
 {
@@ -190,15 +189,28 @@ class ProductResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->modelLabel('dd')->exports([
-                    ExcelExport::make('table')->fromTable()->label('მთავარი გვერდის ექსპორტი'),
-                    ExcelExport::make('form')->fromForm()->label('შიდა გვერდის ექსპორტი'),
-                ])
+                Tables\Actions\Action::make('export_details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('ექსელის ექსპორტი')
+                    ->action(function ($record) {
+                        $fileName = 'პროდუქტი_' . $record->title . '.xlsx';
+                        return Excel::download(
+                            new ProductExport([$record]), $fileName
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
+                    Tables\Actions\BulkAction::make('export_bulk')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->label('ექსპორტი ექსელში')
+                        ->action(function ($records) {
+                            $fileName = 'პროდუქცია_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            return Excel::download(
+                                new ProductExport($records), $fileName
+                            );
+                        }),
                 ]),
             ]);
     }

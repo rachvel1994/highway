@@ -151,7 +151,7 @@ class EquipmentResource extends Resource
                     ->action(function ($record) {
                         $record->load('damages');
 
-                        $fileName = 'ტექნიკა_' . $record->street . '.xlsx';
+                        $fileName = 'ტექნიკა_' . $record->equipment . '.xlsx';
                         return Excel::download(
                             new EquipmentExport([$record]), $fileName
                         );

@@ -63,7 +63,7 @@ class CompanyResource extends Resource
                     ->action(function ($record) {
                         $record->load('company_items');
 
-                        $fileName = 'კომპანია_' . $record->street . '.xlsx';
+                        $fileName = 'კომპანია_' . $record->company . '.xlsx';
                         return Excel::download(
                             new CompanyExport([$record]), $fileName
                         );

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\JobTypeExport;
 use App\Filament\Resources\JobTypeResource\Pages;
 use App\Models\JobType;
 use Filament\Forms;
@@ -9,9 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class JobTypeResource extends Resource
 {
@@ -56,14 +55,28 @@ class JobTypeResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                ExportAction::make()->label('ექსელის ექსპორტი')->exports([
-                    ExcelExport::make('table')->fromTable(),
-                ])
+                Tables\Actions\Action::make('export_details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('ექსელის ექსპორტი')
+                    ->action(function ($record) {
+                        $fileName = 'სამუშაო_ტიპი_' . $record->title . '.xlsx';
+                        return Excel::download(
+                            new JobTypeExport([$record]), $fileName
+                        );
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    ExportBulkAction::make()->label('ექსპორტი ექსელში')
+                    Tables\Actions\BulkAction::make('export_bulk')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->label('ექსპორტი ექსელში')
+                        ->action(function ($records) {
+                            $fileName = 'სამუშაო_ტიპები_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                            return Excel::download(
+                                new JobTypeExport($records), $fileName
+                            );
+                        }),
                 ]),
             ]);
     }
