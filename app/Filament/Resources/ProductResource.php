@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Exports\ProductExport;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers\StoreRelationManager;
 use App\Models\Product;
-use App\ProductExport;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
