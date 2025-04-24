@@ -12,7 +12,7 @@ use Illuminate\Support\Number;
 if (!function_exists('money')) {
     function money(mixed $money = 0, string $currency = 'GEL'): string
     {
-        return Number::currency($money ?? 0, $currency, app()->getLocale());
+        return Number::currency(str_replace(',', '.', $money) ?? 0, $currency, app()->getLocale());
     }
 }
 
@@ -39,9 +39,9 @@ if (!function_exists('getItemsByCompanyId')) {
     function getItemsByCompanyId(int $id): array
     {
         return CompanyItem::with('company')
-        ->where('company_id', $id)
+            ->where('company_id', $id)
             ->get()
-            ->mapWithKeys(fn ($item) => [$item->id => $item->title_with_company])
+            ->mapWithKeys(fn($item) => [$item->id => $item->title_with_company])
             ->toArray() ?? [];
     }
 }
@@ -52,7 +52,7 @@ if (!function_exists('getProductsByStoreId')) {
         return Product::with('store')
             ->where('store_id', $id)
             ->get()
-            ->mapWithKeys(fn ($product) => [$product->id => $product->title_with_store])
+            ->mapWithKeys(fn($product) => [$product->id => $product->title_with_store])
             ->toArray() ?? [];
     }
 }
@@ -111,8 +111,8 @@ if (!function_exists('getFuelById')) {
 if (!function_exists('getTotalPrice')) {
     function getTotalPrice(mixed $price = 0, mixed $quantity = 0): float
     {
-        $price = empty($price) ? 0 : $price;
-        $quantity = empty($quantity) ? 0 : $quantity;
+        $price = empty($price) ? 0 : str_replace(',', '.', $price);
+        $quantity = empty($quantity) ? 0 : str_replace(',', '.', $quantity);
 
         return $price * $quantity;
     }
