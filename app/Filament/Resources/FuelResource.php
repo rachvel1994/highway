@@ -40,7 +40,6 @@ class FuelResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('price')
                             ->label('ფასი')
-                            ->numeric()
                             ->default(0)
                             ->postfix('₾')
                             ->reactive()
@@ -59,7 +58,6 @@ class FuelResource extends Resource
                             ->default(0),
                         Forms\Components\TextInput::make('total_price')
                             ->label('ჯამური ჯამი')
-                            ->numeric()
                             ->reactive()
                             ->default(0)
                     ])
