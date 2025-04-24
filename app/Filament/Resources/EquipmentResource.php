@@ -55,10 +55,12 @@ class EquipmentResource extends Resource
                     ->reactive(),
                 Forms\Components\TextInput::make('price')
                     ->label('ფასი')
+                    ->extraAttributes(['inputmode' => 'decimal'])
+                    ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
+                    ->rule('numeric')
                     ->default(0)
                     ->minValue(0)
                     ->postfix('₾')
-                    ->numeric()
                     ->disabled(fn(Forms\Get $get) => $get('type') == 'main'),
             ]);
     }
@@ -108,11 +110,15 @@ class EquipmentResource extends Resource
                     ->form([
                         TextInput::make('from')
                             ->label('მინ. ფასი')
-                            ->numeric()
+                            ->extraAttributes(['inputmode' => 'decimal'])
+                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
+                            ->rule('numeric')
                             ->debounce(),
                         TextInput::make('to')
                             ->label('მაქს. ფასი')
-                            ->numeric()
+                            ->extraAttributes(['inputmode' => 'decimal'])
+                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
+                            ->rule('numeric')
                             ->debounce(),
                     ])
                     ->query(function (Builder $query, array $data) {

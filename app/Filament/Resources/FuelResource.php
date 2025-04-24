@@ -121,11 +121,15 @@ class FuelResource extends Resource
                     ->form([
                         TextInput::make('from')
                             ->label('ფასიდან')
-                            ->numeric()
+                            ->extraAttributes(['inputmode' => 'decimal'])
+                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
+                            ->rule('numeric')
                             ->debounce(),
                         TextInput::make('to')
                             ->label('ფასამდე')
-                            ->numeric()
+                            ->extraAttributes(['inputmode' => 'decimal'])
+                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
+                            ->rule('numeric')
                             ->debounce(),
                     ])
                     ->query(function (Builder $query, array $data) {
@@ -141,11 +145,15 @@ class FuelResource extends Resource
                     ->form([
                         TextInput::make('total_from')
                             ->label('ჯამური ფასიდან')
-                            ->numeric()
+                            ->extraAttributes(['inputmode' => 'decimal'])
+                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
+                            ->rule('numeric')
                             ->debounce(),
                         TextInput::make('total_to')
                             ->label('ჯამური ფასამდე')
-                            ->numeric()
+                            ->extraAttributes(['inputmode' => 'decimal'])
+                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
+                            ->rule('numeric')
                             ->debounce(),
                     ])
                     ->query(function (Builder $query, array $data) {
