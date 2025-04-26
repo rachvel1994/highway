@@ -5,11 +5,11 @@ namespace App\Filament\Resources;
 use App\Exports\EquipmentExport;
 use App\Filament\Resources\EquipmentResource\Pages;
 use App\Filament\Resources\EquipmentResource\RelationManagers\DamagesRelationManager;
+use App\Forms\Components\PriceInput;
 use App\Models\Equipment;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -53,14 +53,9 @@ class EquipmentResource extends Resource
                     })
                     ->required()
                     ->reactive(),
-                Forms\Components\TextInput::make('price')
+                PriceInput::make('price')
                     ->label('ფასი')
-                    ->extraAttributes(['inputmode' => 'decimal'])
-                    ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                    ->rule('numeric')
-                    ->default(0)
                     ->minValue(0)
-                    ->postfix('₾')
                     ->disabled(fn(Forms\Get $get) => $get('type') == 'main'),
             ]);
     }
@@ -108,18 +103,10 @@ class EquipmentResource extends Resource
                     ]),
                 Tables\Filters\Filter::make('price')
                     ->form([
-                        TextInput::make('from')
-                            ->label('მინ. ფასი')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
-                        TextInput::make('to')
-                            ->label('მაქს. ფასი')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
+                        PriceInput::make('from')
+                            ->label('მინ. ფასი'),
+                        PriceInput::make('to')
+                            ->label('მაქს. ფასი'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query

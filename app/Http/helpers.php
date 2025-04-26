@@ -111,9 +111,6 @@ if (!function_exists('getFuelById')) {
 if (!function_exists('getTotalPrice')) {
     function getTotalPrice(mixed $price = 0, mixed $quantity = 0): float
     {
-        $price = !empty($price) && is_string($price) ? 0 : (float)str_replace(',', '.', $price);
-        $quantity = !empty($quantity) && is_string($quantity) ? 0 : (float)str_replace(',', '.', $quantity);
-
-        return $price * $quantity;
+        return (float)$price * (float)$quantity;
     }
 }

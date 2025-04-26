@@ -5,11 +5,12 @@ namespace App\Filament\Resources;
 use App\Exports\CompanyItemExport;
 use App\Filament\Resources\CompanyItemResource\Pages;
 use App\Filament\Resources\CompanyItemResource\RelationManagers\CompanyRelationManager;
+use App\Forms\Components\NumericInput;
+use App\Forms\Components\PriceInput;
 use App\Models\CompanyItem;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -45,36 +46,14 @@ class CompanyItemResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Grid::make(5)->schema([
-                    Forms\Components\TextInput::make('price')
+                    PriceInput::make('price')
                         ->label('ფასი')
-                        ->required()
-                        ->extraAttributes(['inputmode' => 'decimal'])
-                        ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                        ->rule('numeric')
-                        ->default(0)
-                        ->postfix('₾')
-                        ->debounce(3)
-                        ->reactive()
                         ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotalPrice($set, $get)),
-                    Forms\Components\TextInput::make('quantity')
+                    NumericInput::make('quantity')
                         ->label('რაოდენობა')
-                        ->required()
-                        ->extraAttributes(['inputmode' => 'decimal'])
-                        ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                        ->rule('numeric')
-                        ->debounce(3)
-                        ->default(0)
-                        ->reactive()
                         ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotalPrice($set, $get)),
-                    Forms\Components\TextInput::make('total_price')
-                        ->label('ჯამური ფასი')
-                        ->required()
-                        ->extraAttributes(['inputmode' => 'decimal'])
-                        ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                        ->rule('numeric')
-                        ->debounce(3)
-                        ->default(0)
-                        ->postfix('₾'),
+                    PriceInput::make('total_price')
+                        ->label('ჯამური ფასი'),
                     Forms\Components\Select::make('category_id')
                         ->label('კატეგორია')
                         ->required()
@@ -158,18 +137,10 @@ class CompanyItemResource extends Resource
                     ->relationship('measure', 'short_title'),
                 Tables\Filters\Filter::make('price')
                     ->form([
-                        Forms\Components\TextInput::make('min_price')
-                            ->label('მინ. ფასი')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
-                        TextInput::make('max_price')
-                            ->label('მაქს. ფასი')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
+                        PriceInput::make('min_price')
+                            ->label('მინ. ფასი'),
+                        PriceInput::make('max_price')
+                            ->label('მაქს. ფასი'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query

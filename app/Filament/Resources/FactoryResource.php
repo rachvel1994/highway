@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Exports\FactoryExport;
 use App\Filament\Resources\FactoryResource\Pages;
+use App\Forms\Components\NumericInput;
+use App\Forms\Components\PriceInput;
 use App\Models\Factory;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -43,56 +45,20 @@ class FactoryResource extends Resource
                     ]),
                 Forms\Components\Grid::make(5)
                     ->schema([
-                        Forms\Components\TextInput::make('quantity')
+                        NumericInput::make('quantity')
                             ->label('რაოდენობა')
-                            ->default(0)
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->reactive()
-                            ->debounce(3)
                             ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
-
-                        Forms\Components\TextInput::make('detail_price')
+                        PriceInput::make('detail_price')
                             ->label('დეტალის ფასი')
-                            ->default(0)
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(3)
-                            ->postfix('₾')
-                            ->reactive()
                             ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
-
-                        Forms\Components\TextInput::make('craft_price')
+                        PriceInput::make('craft_price')
                             ->label('ხელობის ფასი')
-                            ->default(0)
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->reactive()
-                            ->debounce(3)
-                            ->postfix('₾')
                             ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
-
-                        Forms\Components\TextInput::make('additional_expense')
+                        PriceInput::make('additional_expense')
                             ->label('დამატებითი ხარჯი')
-                            ->default(0)
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->reactive()
-                            ->postfix('₾')
-                            ->debounce(3)
                             ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
-
-                        Forms\Components\TextInput::make('total_price')
-                            ->label('ჯამური ფასი')
-                            ->default(0)
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->postfix('₾'),
+                        PriceInput::make('total_price')
+                            ->label('ჯამური ფასი'),
                     ]),
                 Forms\Components\Textarea::make('comment')
                     ->rows(5)

@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Exports\WorkAssetExport;
 use App\Filament\Resources\WorkAssetResource\Pages;
+use App\Forms\Components\NumericInput;
+use App\Forms\Components\PriceInput;
 use App\Models\WorkAsset;
 use Exception;
 use Filament\Forms;
@@ -40,16 +42,10 @@ class WorkAssetResource extends Resource
                         ->unique(ignoreRecord: true)
                         ->required()
                         ->maxLength(255),
-                    Forms\Components\TextInput::make('grand_total')
-                        ->label('ობიექტის ჯამი')
-                        ->default(0)
-                        ->disabled()
-                        ->postfix('₾'),
-                    Forms\Components\TextInput::make('damage_share_total')
-                        ->label('დაზიანების ჯამი')
-                        ->default(0)
-                        ->disabled()
-                        ->postfix('₾'),
+                    PriceInput::make('grand_total')
+                        ->label('ობიექტის ჯამი'),
+                    PriceInput::make('damage_share_total')
+                        ->label('დაზიანების ჯამი'),
                 ]),
                 Forms\Components\Toggle::make('is_completed')
                     ->default(0)
@@ -76,20 +72,11 @@ class WorkAssetResource extends Resource
                                             ->relationship('equipment', 'id')
                                             ->getOptionLabelFromRecordUsing(fn($record) => $record->equipment_with_type),
 
-                                        Forms\Components\TextInput::make('time_spend')
-                                            ->label('მოხმარებული დრო')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric'),
+                                        NumericInput::make('time_spend')
+                                            ->label('მოხმარებული დრო'),
 
-                                        Forms\Components\TextInput::make('completed_trip')
-                                            ->label('რეისის რაოდენობა')
-                                            ->default(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric'),
+                                        NumericInput::make('completed_trip')
+                                            ->label('რეისის რაოდენობა'),
                                     ]),
                                 ]),
 
@@ -109,35 +96,16 @@ class WorkAssetResource extends Resource
                                                 self::getFuelTotalPrice($set, $get);
                                             }),
 
-                                        Forms\Components\TextInput::make('fuel_price')
+                                        PriceInput::make('fuel_price')
                                             ->label('საწვავის ფასი')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
                                             ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::getFuelTotalPrice($set, $get)),
 
-                                        Forms\Components\TextInput::make('fuel_spend')
+                                        NumericInput::make('fuel_spend')
                                             ->label('მოხმარებული საწვავი')
-                                            ->default(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
-                                            ->minValue(0)
                                             ->afterStateUpdated(fn(Forms\Set $set, Forms\Get $get) => self::getFuelTotalPrice($set, $get)),
 
-                                        Forms\Components\TextInput::make('fuel_total_price')
-                                            ->label('ჯამური ფასი')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
-                                            ->postfix('₾'),
+                                        PriceInput::make('fuel_total_price')
+                                            ->label('ჯამური ფასი'),
                                     ]),
                                 ]),
 
@@ -169,35 +137,16 @@ class WorkAssetResource extends Resource
                                             })
                                             ->disabled(fn(Forms\Get $get) => !$get('company_id')),
 
-                                        Forms\Components\TextInput::make('item_price')
+                                        PriceInput::make('item_price')
                                             ->label('მასალის ფასი')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => self::getItemTotalPrice($set, $get)),
 
-                                        Forms\Components\TextInput::make('item_quantity')
+                                        NumericInput::make('item_quantity')
                                             ->label('მასალის რაოდენობა')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => self::getItemTotalPrice($set, $get)),
 
-                                        Forms\Components\TextInput::make('item_total_price')
-                                            ->label('ჯამური ფასი')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
-                                            ->postfix('₾'),
+                                        PriceInput::make('item_total_price')
+                                            ->label('ჯამური ფასი'),
                                     ]),
                                 ]),
 
@@ -229,36 +178,16 @@ class WorkAssetResource extends Resource
                                             })
                                             ->disabled(fn(Forms\Get $get) => !$get('store_id')),
 
-                                        Forms\Components\TextInput::make('product_price')
+                                        PriceInput::make('product_price')
                                             ->label('პროდუქციის ფასი')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->postfix('₾')
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => self::getProductTotalPrice($set, $get)),
 
-                                        Forms\Components\TextInput::make('product_quantity')
+                                        NumericInput::make('product_quantity')
                                             ->label('პროდუქციის რაოდენობა')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => self::getProductTotalPrice($set, $get)),
 
-                                        Forms\Components\TextInput::make('product_price_total')
-                                            ->label('ჯამური ფასი')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
-                                            ->postfix('₾'),
+                                        PriceInput::make('product_price_total')
+                                            ->label('ჯამური ფასი'),
                                     ]),
                                 ]),
 
@@ -270,15 +199,8 @@ class WorkAssetResource extends Resource
                                             ->preload()
                                             ->relationship('personal', 'full_name')
                                             ->reactive(),
-                                        Forms\Components\TextInput::make('person_salary')
+                                        PriceInput::make('person_salary')
                                             ->label('ხელფასი')
-                                            ->postfix('₾')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get)),
                                         Forms\Components\Select::make('person_salary_type')
                                             ->label('ხელფასის ტიპი')
@@ -292,37 +214,18 @@ class WorkAssetResource extends Resource
                                             ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get)),
 
-                                        Forms\Components\TextInput::make('person_worked_days')
+                                        NumericInput::make('person_worked_days')
                                             ->label('ნამუშევარი დღეები')
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get))
                                             ->visible(fn(Forms\Get $get) => $get('person_salary_type') == 2),
 
-                                        Forms\Components\TextInput::make('person_worked_quantity')
+                                        NumericInput::make('person_worked_quantity')
                                             ->label(fn(Forms\Get $get) => $get('person_salary_type') == 3 ? 'რაოდენობა' : 'ნამუშევარი საათი')
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->reactive()
                                             ->afterStateUpdated(fn(callable $set, callable $get) => recalculateSalary($set, $get))
                                             ->visible(fn(Forms\Get $get) => in_array($get('person_salary_type'), [3, 4])),
 
-                                        Forms\Components\TextInput::make('person_salary_total')
-                                            ->label('ხელფასის ჯამი')
-                                            ->postfix('₾')
-                                            ->default(0)
-                                            ->minValue(0)
-                                            ->extraAttributes(['inputmode' => 'decimal'])
-                                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                                            ->rule('numeric')
-                                            ->reactive(),
+                                        PriceInput::make('person_salary_total')
+                                            ->label('ხელფასის ჯამი'),
                                     ]),
                                 ]),
                             ])
@@ -402,12 +305,10 @@ class WorkAssetResource extends Resource
 
                 Tables\Filters\Filter::make('grand_total')
                     ->form([
-                        DatePicker::make('min_total')
-                            ->label('მინ. სრული ჯამი')
-                            ->debounce(),
-                        DatePicker::make('max_total')
-                            ->label('მაქს. სრული ჯამი')
-                            ->debounce(),
+                        PriceInput::make('min_total')
+                            ->label('მინ. სრული ჯამი'),
+                        PriceInput::make('max_total')
+                            ->label('მაქს. სრული ჯამი'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query
@@ -420,12 +321,10 @@ class WorkAssetResource extends Resource
                     }),
                 Tables\Filters\Filter::make('money')
                     ->form([
-                        DatePicker::make('min')
-                            ->label('მინ. თანხა')
-                            ->debounce(),
-                        DatePicker::make('max')
-                            ->label('მაქს. თანხა')
-                            ->debounce(),
+                        PriceInput::make('min')
+                            ->label('მინ. თანხა'),
+                        PriceInput::make('max')
+                            ->label('მაქს. თანხა'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query

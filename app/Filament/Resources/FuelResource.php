@@ -4,11 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Exports\FuelExport;
 use App\Filament\Resources\FuelResource\Pages;
+use App\Forms\Components\NumericInput;
+use App\Forms\Components\PriceInput;
 use App\Models\Fuel;
 use Exception;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -38,39 +39,15 @@ class FuelResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Grid::make(4)
                     ->schema([
-                        Forms\Components\TextInput::make('price')
+                        PriceInput::make('price')
                             ->label('ფასი')
-                            ->type('text') // Allow comma entry
-                            ->default(0)
-                            ->postfix('₾')
-                            ->reactive()
-                            ->debounce(300)
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
                             ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
-                        Forms\Components\TextInput::make('quantity')
+                        NumericInput::make('quantity')
                             ->label('რაოდენობა')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->default(0)
-                            ->reactive()
-                            ->debounce(3)
                             ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
-                        Forms\Components\TextInput::make('remain')
-                            ->label('ნაშთი')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->default(0),
-                        Forms\Components\TextInput::make('total_price')
+                        NumericInput::make('remain'),
+                        PriceInput::make('total_price')
                             ->label('ჯამური ჯამი')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->reactive()
-                            ->default(0)
                     ])
             ]);
     }
@@ -119,18 +96,10 @@ class FuelResource extends Resource
             ->filters([
                 Tables\Filters\Filter::make('price')
                     ->form([
-                        TextInput::make('from')
-                            ->label('ფასიდან')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
-                        TextInput::make('to')
-                            ->label('ფასამდე')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
+                        PriceInput::make('from')
+                            ->label('ფასიდან'),
+                        PriceInput::make('to')
+                            ->label('ფასამდე'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query
@@ -143,18 +112,9 @@ class FuelResource extends Resource
                     }),
                 Tables\Filters\Filter::make('total_price')
                     ->form([
-                        TextInput::make('total_from')
-                            ->label('ჯამური ფასიდან')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
-                        TextInput::make('total_to')
-                            ->label('ჯამური ფასამდე')
-                            ->extraAttributes(['inputmode' => 'decimal'])
-                            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', $state))
-                            ->rule('numeric')
-                            ->debounce(),
+                        PriceInput::make('total_from'),
+                        PriceInput::make('total_to')
+                            ->label('ჯამური ფასამდე'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query
