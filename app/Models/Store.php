@@ -15,4 +15,9 @@ class Store extends Model
     {
         return $this->hasMany(Product::class, 'store_id', 'id');
     }
+
+    public function getTotalPriceAttribute(): float
+    {
+        return $this->products()->sum('total_price') ?? 0;
+    }
 }

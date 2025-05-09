@@ -46,6 +46,11 @@ class CompanyResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('total_price')
+                    ->label('ჯამური ფასი')
+                    ->money('GEL')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('დამტების თარიღი')
                     ->dateTime()

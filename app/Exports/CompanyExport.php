@@ -29,12 +29,14 @@ class CompanyExport implements FromCollection, WithHeadings, ShouldAutoSize
 
             $rows[] = [
                 'კომპანია' => $company->company,
+                'ჯამური ჯამი' => money($company->total_price),
                 'ინფორმაცია' => 'კომპანია',
             ];
 
             foreach ($company->company_items as $item) {
                 $rows[] = [
                     'კომპანია' => null,
+                    'ჯამური ჯამი' => null,
                     'ინფორმაცია' => 'ნივთი',
                     'სახელი' => $item->title,
                     'ფასი' => money($item->price),
@@ -59,6 +61,7 @@ class CompanyExport implements FromCollection, WithHeadings, ShouldAutoSize
     {
         return [
             'კომპანია',
+            'ჯამური ჯამი',
             'ინფორმაცია',
             'სახელი',
             'ფასი',

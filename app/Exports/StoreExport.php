@@ -29,12 +29,14 @@ class StoreExport implements FromCollection, WithHeadings, ShouldAutoSize
 
             $rows[] = [
                 'მაღაზია' => $store->store,
+                'ჯამური ფასი' => money($store->total_price),
                 'ინფორმაცია' => 'მაღაზია',
             ];
 
             foreach ($store->products as $product) {
                 $rows[] = [
                     'მაღაზია' => null,
+                    'ჯამური ჯამი' => null,
                     'ინფორმაცია' => 'პროდუქტი',
                     'სახელი' => $product->title,
                     'ფასი' => money($product->price),
@@ -59,6 +61,7 @@ class StoreExport implements FromCollection, WithHeadings, ShouldAutoSize
     {
         return [
             'მაღაზია',
+            'ჯამური ჯამი',
             'ინფორმაცია',
             'სახელი',
             'ფასი',

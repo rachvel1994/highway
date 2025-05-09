@@ -53,6 +53,11 @@ class StoreResource extends Resource
                     ->label('სახელი')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('total_price')
+                    ->label('ჯამური ფასი')
+                    ->money('GEL')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('დამატების თარიღი')
                     ->dateTime()

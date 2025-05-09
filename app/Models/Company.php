@@ -15,4 +15,9 @@ class Company extends Model
     {
         return $this->hasMany(CompanyItem::class, 'company_id', 'id');
     }
+
+    public function getTotalPriceAttribute(): float
+    {
+        return $this->company_items()->sum('total_price') ?? 0;
+    }
 }

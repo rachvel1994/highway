@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\Unique;
 use Maatwebsite\Excel\Facades\Excel;
 
 class CompanyItemResource extends Resource
@@ -44,6 +45,14 @@ class CompanyItemResource extends Resource
                 Forms\Components\TextInput::make('title')
                     ->label('სახელი')
                     ->required()
+                    ->unique(
+                        table: 'company_items',
+                        column: 'title',
+                        ignoreRecord: true,
+                        modifyRuleUsing: function ($rule, Forms\Get $get) {
+                            return $rule->where('company_id', $get('company_id'));
+                        }
+                    )
                     ->maxLength(255),
                 Forms\Components\Grid::make(5)->schema([
                     PriceInput::make('price')

@@ -41,7 +41,14 @@ class ProductResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('title')
                     ->label('სახელი')
-                    ->unique(ignoreRecord: true)
+                    ->unique(
+                        table: 'products',
+                        column: 'title',
+                        ignoreRecord: true,
+                        modifyRuleUsing: function ($rule, Forms\Get $get) {
+                            return $rule->where('store_id', $get('store_id'));
+                        }
+                    )
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Grid::make(5)->schema([
