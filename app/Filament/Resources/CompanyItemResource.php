@@ -37,23 +37,30 @@ class CompanyItemResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('company_id')
-                    ->label('კომპანია')
-                    ->preload()
-                    ->relationship('company', 'company')
-                    ->required(),
-                Forms\Components\TextInput::make('title')
-                    ->label('სახელი')
-                    ->required()
-                    ->unique(
-                        table: 'company_items',
-                        column: 'title',
-                        ignoreRecord: true,
-                        modifyRuleUsing: function ($rule, Forms\Get $get) {
-                            return $rule->where('company_id', $get('company_id'));
-                        }
-                    )
-                    ->maxLength(255),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\Select::make('company_id')
+                        ->label('კომპანია')
+                        ->preload()
+                        ->relationship('company', 'company')
+                        ->required(),
+                    Forms\Components\TextInput::make('title')
+                        ->label('სახელი')
+                        ->required()
+//                    ->unique(
+//                        table: 'company_items',
+//                        column: 'title',
+//                        ignoreRecord: true,
+//                        modifyRuleUsing: function ($rule, Forms\Get $get) {
+//                            return $rule->where('company_id', $get('company_id'));
+//                        }
+//                    )
+                        ->maxLength(255),
+                    DatePicker::make('buy_at')
+                        ->required()
+                        ->default(today())
+                        ->label('ყიდვის თარიღი')
+                ]),
+
                 Forms\Components\Grid::make(5)->schema([
                     PriceInput::make('price')
                         ->label('ფასი')
@@ -121,6 +128,11 @@ class CompanyItemResource extends Resource
                     ->label('საზომი ერთეული')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('buy_at')
+                    ->label('ყიდვის თარიღი')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('comment')
                     ->label('კომენტარი')
                     ->sortable()
@@ -129,7 +141,7 @@ class CompanyItemResource extends Resource
                     ->label('დამატების თარიღი')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('company_id')
@@ -178,6 +190,24 @@ class CompanyItemResource extends Resource
                             })
                             ->when($data['to'], function (Builder $query, ?string $to) {
                                 $query->where('created_at', '<=', $to);
+                            });
+                    }),
+                Tables\Filters\Filter::make('buy_at')
+                    ->form([
+                        DatePicker::make('buy_from')
+                            ->label('თარიღიდან')
+                            ->debounce(),
+                        DatePicker::make('buy_to')
+                            ->label('თარიღამდე')
+                            ->debounce(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['buy_from'], function (Builder $query, ?string $from) {
+                                $query->where('buy_at', '>=', $from);
+                            })
+                            ->when($data['buy_to'], function (Builder $query, ?string $to) {
+                                $query->where('buy_at', '<=', $to);
                             });
                     })
             ])

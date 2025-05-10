@@ -34,28 +34,34 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('store_id')
-                    ->label('მაღაზია')
-                    ->preload()
-                    ->relationship('store', 'store')
-                    ->required(),
-                Forms\Components\TextInput::make('title')
-                    ->label('სახელი')
-                    ->unique(
-                        table: 'products',
-                        column: 'title',
-                        ignoreRecord: true,
-                        modifyRuleUsing: function ($rule, Forms\Get $get) {
-                            return $rule->where('store_id', $get('store_id'));
-                        }
-                    )
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Grid::make(3)->schema([
+                    Forms\Components\Select::make('store_id')
+                        ->label('მაღაზია')
+                        ->preload()
+                        ->relationship('store', 'store')
+                        ->required(),
+                    Forms\Components\TextInput::make('title')
+                        ->label('სახელი')
+//                    ->unique(
+//                        table: 'products',
+//                        column: 'title',
+//                        ignoreRecord: true,
+//                        modifyRuleUsing: function ($rule, Forms\Get $get) {
+//                            return $rule->where('store_id', $get('store_id'));
+//                        }
+//                    )
+                        ->required()
+                        ->maxLength(255),
+                    DatePicker::make('buy_at')
+                        ->required()
+                        ->default(today())
+                        ->label('ყიდვის თარიღი')
+                ]),
                 Forms\Components\Grid::make(5)->schema([
                     PriceInput::make('price')
                         ->label('ფასი')
                         ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
-                   NumericInput::make('quantity')
+                    NumericInput::make('quantity')
                         ->label('რაოდენობა')
                         ->afterStateUpdated(fn(Forms\Get $get, Forms\Set $set) => self::calculateTotalPrice($get, $set)),
                     PriceInput::make('total_price')
@@ -118,10 +124,15 @@ class ProductResource extends Resource
                     ->label('საზომი ერთეული')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('buy_at')
+                    ->label('ყიდვის თარიღი')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('comment')
                     ->label('კომენტარი')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('დამატების თარიღი')
                     ->dateTime()
@@ -175,6 +186,24 @@ class ProductResource extends Resource
                             })
                             ->when($data['to'], function (Builder $query, ?string $to) {
                                 $query->where('created_at', '<=', $to);
+                            });
+                    }),
+                Tables\Filters\Filter::make('buy_at')
+                    ->form([
+                        DatePicker::make('buy_from')
+                            ->label('თარიღიდან')
+                            ->debounce(),
+                        DatePicker::make('buy_to')
+                            ->label('თარიღამდე')
+                            ->debounce(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['buy_from'], function (Builder $query, ?string $from) {
+                                $query->where('buy_at', '>=', $from);
+                            })
+                            ->when($data['buy_to'], function (Builder $query, ?string $to) {
+                                $query->where('buy_at', '<=', $to);
                             });
                     })
             ])

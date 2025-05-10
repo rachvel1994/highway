@@ -16,6 +16,8 @@ class CompanyItem extends Model
         'price',
         'total_price',
         'comment',
+        'buy_at',
+        'sold_at',
     ];
 
     protected $casts = [
